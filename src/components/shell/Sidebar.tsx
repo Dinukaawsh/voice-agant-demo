@@ -9,10 +9,12 @@ export function Sidebar({
   collapsed,
   mobileOpen,
   onCloseMobile,
+  onToggleCollapsed,
 }: {
   collapsed: boolean;
   mobileOpen: boolean;
   onCloseMobile: () => void;
+  onToggleCollapsed: () => void;
 }) {
   const pathname = usePathname();
 
@@ -45,7 +47,6 @@ export function Sidebar({
               <p className="truncate text-sm font-semibold tracking-tight text-ink">
                 Twist Voice
               </p>
-              <p className="truncate text-[11px] text-ink-hint">Demo mockup</p>
             </div>
           )}
         </Link>

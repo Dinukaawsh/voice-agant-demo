@@ -11,9 +11,22 @@ import {
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { CampaignCreationModal } from "@/components/campaigns/CampaignCreationModal";
+import {
+  CampaignCreationModal,
+  type NewCampaign,
+} from "@/components/campaigns/CampaignCreationModal";
 
-const CAMPAIGNS = [
+type CampaignRow = {
+  name: string;
+  agent: string;
+  status: string;
+  leads: number;
+  called: number;
+  qualified: number;
+  schedule: string;
+};
+
+const INITIAL_CAMPAIGNS: CampaignRow[] = [
   {
     name: "Health FR - July outbound",
     agent: "Health insurance FR - July",
@@ -60,6 +73,11 @@ function statusVariant(status: string) {
 
 export function CampaignsView() {
   const [createOpen, setCreateOpen] = useState(false);
+  const [campaigns, setCampaigns] = useState<CampaignRow[]>(INITIAL_CAMPAIGNS);
+
+  function handleCreateCampaign(campaign: NewCampaign) {
+    setCampaigns((prev) => [campaign, ...prev]);
+  }
 
   return (
     <>
@@ -90,7 +108,7 @@ export function CampaignsView() {
                 </tr>
               </thead>
               <tbody>
-                {CAMPAIGNS.map((c) => {
+                {campaigns.map((c) => {
                   const progress =
                     c.leads > 0 ? Math.round((c.called / c.leads) * 100) : 0;
                   const convRate =
@@ -192,6 +210,7 @@ export function CampaignsView() {
       <CampaignCreationModal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
+        onCreate={handleCreateCampaign}
       />
     </>
   );

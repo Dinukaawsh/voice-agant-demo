@@ -85,7 +85,7 @@ export default function BillingPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardTitle subtitle="Daily spend this week">Cost trend</CardTitle>
-          <div className="flex h-52 items-end justify-between gap-3 px-1">
+          <div className="flex items-end justify-between gap-3 px-1">
             {DAILY_COSTS.map((d) => (
               <div
                 key={d.day}
@@ -96,7 +96,9 @@ export default function BillingPage() {
                 </span>
                 <div
                   className="w-full rounded-t-lg bg-gradient-to-t from-accent to-accent/70 transition-all hover:from-accent hover:to-accent/70"
-                  style={{ height: `${(d.amount / maxCost) * 100}%` }}
+                  style={{
+                    height: `${Math.round((d.amount / maxCost) * 160)}px`,
+                  }}
                 />
                 <span className="text-[10px] text-ink-hint">{d.day}</span>
               </div>

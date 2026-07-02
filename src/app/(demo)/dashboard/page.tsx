@@ -42,6 +42,16 @@ const RECENT_CALLS = [
   },
 ];
 
+const CALL_VOLUME = [
+  { day: "Mon", calls: 840 },
+  { day: "Tue", calls: 1160 },
+  { day: "Wed", calls: 1020 },
+  { day: "Thu", calls: 1440 },
+  { day: "Fri", calls: 1300 },
+  { day: "Sat", calls: 1760 },
+  { day: "Sun", calls: 1520 },
+];
+
 const CAMPAIGN_PROGRESS = [
   { name: "Health FR - July", pct: 68, calls: 1240, qualified: 312 },
   { name: "Solar EN - Q3", pct: 34, calls: 580, qualified: 89 },
@@ -49,6 +59,8 @@ const CAMPAIGN_PROGRESS = [
 ];
 
 export default function DashboardPage() {
+  const maxCalls = Math.max(...CALL_VOLUME.map((d) => d.calls));
+
   return (
     <div className="animate-fade-up space-y-6 p-5 lg:p-8">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -95,16 +107,22 @@ export default function DashboardPage() {
           >
             Call volume
           </CardTitle>
-          <div className="flex h-48 items-end justify-between gap-2 px-1">
-            {[42, 58, 51, 72, 65, 88, 76].map((h, i) => (
-              <div key={i} className="flex flex-1 flex-col items-center gap-2">
+          <div className="flex items-end justify-between gap-2 px-1">
+            {CALL_VOLUME.map((d) => (
+              <div
+                key={d.day}
+                className="flex flex-1 flex-col items-center gap-2"
+              >
+                <span className="text-[11px] font-medium text-ink-muted">
+                  {d.calls.toLocaleString()}
+                </span>
                 <div
                   className="w-full rounded-t-md bg-gradient-to-t from-accent to-accent/60 transition-all hover:from-accent hover:to-accent/80"
-                  style={{ height: `${h}%` }}
+                  style={{
+                    height: `${Math.round((d.calls / maxCalls) * 150)}px`,
+                  }}
                 />
-                <span className="text-[10px] text-ink-hint">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i]}
-                </span>
+                <span className="text-[10px] text-ink-hint">{d.day}</span>
               </div>
             ))}
           </div>

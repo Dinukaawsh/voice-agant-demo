@@ -18,7 +18,16 @@ import { Button } from "@/components/ui/Button";
 import { AgentCreationModal } from "@/components/agents/AgentCreationModal";
 import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 
-const AGENTS = [
+type AgentRow = {
+  name: string;
+  language: string;
+  status: string;
+  calls: number;
+  qualified: number;
+  updated: string;
+};
+
+const INITIAL_AGENTS: AgentRow[] = [
   {
     name: "Health insurance FR - July",
     language: "French",
@@ -62,13 +71,28 @@ function statusVariant(status: string) {
 export function AgentsView() {
   const [createOpen, setCreateOpen] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [agents, setAgents] = useState<AgentRow[]>(INITIAL_AGENTS);
+
+  function handleCreateAgent(agent: { name: string; language: string }) {
+    setAgents((prev) => [
+      {
+        name: agent.name,
+        language: agent.language,
+        status: "Draft",
+        calls: 0,
+        qualified: 0,
+        updated: "Just now",
+      },
+      ...prev,
+    ]);
+  }
 
   return (
     <>
       <div className="animate-fade-up p-5 lg:p-8">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[14px] text-ink-muted">
-            {AGENTS.length} agents · 2 live · 1 in testing
+            {agents.length} agents · 2 live · 1 in testing
           </p>
           <div className="flex items-center gap-2">
             <div className="flex rounded-xl border border-border bg-surface p-1">
@@ -106,7 +130,7 @@ export function AgentsView() {
 
         {view === "grid" ? (
           <div className="grid gap-4 md:grid-cols-2">
-            {AGENTS.map((agent) => (
+            {agents.map((agent) => (
               <Card
                 key={agent.name}
                 className="group transition-all hover:border-accent/25 hover:shadow-card"
@@ -228,7 +252,7 @@ export function AgentsView() {
                 </tr>
               </thead>
               <tbody>
-                {AGENTS.map((agent) => (
+                {agents.map((agent) => (
                   <tr
                     key={agent.name}
                     className="border-b border-border/60 transition-colors last:border-0 hover:bg-surface-subtle"
@@ -280,7 +304,11 @@ export function AgentsView() {
         )}
       </div>
 
-      <AgentCreationModal open={createOpen} onClose={() => setCreateOpen(false)} />
+      <AgentCreationModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreate={handleCreateAgent}
+      />
     </>
   );
 }

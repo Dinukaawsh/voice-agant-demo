@@ -77,14 +77,20 @@ function FormField({
 function TextInput({
   defaultValue,
   placeholder,
+  value,
+  onChange,
 }: {
   defaultValue?: string;
   placeholder?: string;
+  value?: string;
+  onChange?: (v: string) => void;
 }) {
   return (
     <input
       type="text"
-      defaultValue={defaultValue}
+      defaultValue={onChange ? undefined : defaultValue}
+      value={onChange ? value : undefined}
+      onChange={onChange ? (e) => onChange(e.target.value) : undefined}
       placeholder={placeholder}
       className="w-full rounded-lg border border-border-strong bg-surface px-3 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-hint focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-soft)]"
     />
@@ -263,14 +269,23 @@ function StepIndicator({
   );
 }
 
+export type NewAgent = { name: string; language: string };
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  fr: "French",
+  en: "English",
+  es: "Spanish",
+};
+
 export function AgentCreationWizard({
   onClose,
   onComplete,
 }: {
   onClose?: () => void;
-  onComplete?: () => void;
+  onComplete?: (agent: NewAgent) => void;
 }) {
   const [step, setStep] = useState(1);
+  const [name, setName] = useState("Health insurance FR - July");
   const [language, setLanguage] = useState("fr");
   const [exitRecording, setExitRecording] = useState("exit_billing");
   const [edgeQuestion, setEdgeQuestion] = useState("q1");
@@ -286,7 +301,10 @@ export function AgentCreationWizard({
   function handleNext() {
     if (step < 8) goTo(step + 1);
     else {
-      onComplete?.();
+      onComplete?.({
+        name: name.trim() || "Untitled agent",
+        language: LANGUAGE_LABELS[language] ?? "French",
+      });
       onClose?.();
     }
   }
@@ -322,7 +340,7 @@ export function AgentCreationWizard({
               desc="Basic information about this calling agent."
             >
               <FormField label="Agent name">
-                <TextInput defaultValue="Health insurance FR - July" />
+                <TextInput value={name} onChange={setName} />
               </FormField>
               <FormField label="Language">
                 <CustomSelect

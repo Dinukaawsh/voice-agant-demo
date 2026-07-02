@@ -33,16 +33,38 @@ function Label({ children }: { children: React.ReactNode }) {
   );
 }
 
+export type NewCampaign = {
+  name: string;
+  agent: string;
+  status: string;
+  leads: number;
+  called: number;
+  qualified: number;
+  schedule: string;
+};
+
 export function CampaignCreationModal({
   open,
   onClose,
+  onCreate,
 }: {
   open: boolean;
   onClose: () => void;
+  onCreate?: (campaign: NewCampaign) => void;
 }) {
   const [step, setStep] = useState(1);
-  const [selectedList, setSelectedList] = useState(LEAD_LISTS[0].name);
+  const [name, setName] = useState("Health FR - August outbound");
+  const [agent, setAgent] = useState(AGENTS[0]);
+  const [selectedLists, setSelectedLists] = useState<string[]>([
+    LEAD_LISTS[0].name,
+  ]);
   const [days, setDays] = useState<string[]>(["Mon", "Tue", "Wed", "Thu", "Fri"]);
+
+  function toggleList(name: string) {
+    setSelectedLists((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name],
+    );
+  }
 
   function toggleDay(day: string) {
     setDays((prev) =>
@@ -50,9 +72,26 @@ export function CampaignCreationModal({
     );
   }
 
+  const selectedLeadCount = LEAD_LISTS.filter((l) =>
+    selectedLists.includes(l.name),
+  ).reduce((sum, l) => sum + l.count, 0);
+
   function handleNext() {
-    if (step < 4) setStep(step + 1);
-    else onClose();
+    if (step < 4) {
+      setStep(step + 1);
+      return;
+    }
+    onCreate?.({
+      name: name.trim() || "Untitled campaign",
+      agent,
+      status: "Running",
+      leads: selectedLeadCount,
+      called: 0,
+      qualified: 0,
+      schedule: `${days.join(", ")} · 9:00-18:00 CET`,
+    });
+    setStep(1);
+    onClose();
   }
 
   return (
@@ -113,12 +152,14 @@ export function CampaignCreationModal({
           <Label>Campaign name</Label>
           <input
             type="text"
-            defaultValue="Health FR - August outbound"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="w-full rounded-lg border border-border-strong bg-surface px-3 py-2.5 text-sm outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-soft)]"
           />
           <Label>Voice agent</Label>
           <select
-            defaultValue={AGENTS[0]}
+            value={agent}
+            onChange={(e) => setAgent(e.target.value)}
             className="w-full rounded-lg border border-border-strong bg-surface px-3 py-2.5 text-sm outline-none focus:border-accent"
           >
             {AGENTS.map((a) => (
@@ -137,32 +178,42 @@ export function CampaignCreationModal({
       {step === 2 && (
         <div className="space-y-2">
           <p className="mb-3 text-[13px] text-ink-muted">
-            Choose a lead list to dial. You can import a new list anytime.
+            Choose one or more lead lists to dial. You can import a new list
+            anytime.
           </p>
-          {LEAD_LISTS.map((list) => (
-            <button
-              key={list.name}
-              type="button"
-              onClick={() => setSelectedList(list.name)}
-              className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all ${
-                selectedList === list.name
-                  ? "border-accent bg-accent-soft shadow-sm"
-                  : "border-border bg-surface hover:border-accent/30"
-              }`}
-            >
-              <div>
-                <p className="text-[14px] font-medium text-ink">{list.name}</p>
-                <p className="text-[12px] text-ink-muted">
-                  {list.count.toLocaleString()} leads
-                </p>
-              </div>
-              {selectedList === list.name && (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white">
-                  <Check className="h-3.5 w-3.5" strokeWidth={3} />
+          {LEAD_LISTS.map((list) => {
+            const selected = selectedLists.includes(list.name);
+            return (
+              <button
+                key={list.name}
+                type="button"
+                onClick={() => toggleList(list.name)}
+                className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-all ${
+                  selected
+                    ? "border-accent bg-accent-soft shadow-sm"
+                    : "border-border bg-surface hover:border-accent/30"
+                }`}
+              >
+                <div>
+                  <p className="text-[14px] font-medium text-ink">{list.name}</p>
+                  <p className="text-[12px] text-ink-muted">
+                    {list.count.toLocaleString()} leads
+                  </p>
                 </div>
-              )}
-            </button>
-          ))}
+                <div
+                  className={`flex h-6 w-6 items-center justify-center rounded-md border transition-all ${
+                    selected
+                      ? "border-accent bg-accent text-white"
+                      : "border-border-strong bg-surface"
+                  }`}
+                >
+                  {selected && (
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                  )}
+                </div>
+              </button>
+            );
+          })}
           <button
             type="button"
             className="w-full rounded-xl border border-dashed border-border-strong py-3 text-[13px] font-medium text-accent hover:border-accent hover:bg-accent-soft"
@@ -232,11 +283,14 @@ export function CampaignCreationModal({
             </p>
             <div className="mt-3 space-y-2.5 text-[13.5px]">
               {[
-                ["Campaign", "Health FR - August outbound"],
-                ["Agent", AGENTS[0]],
-                ["Lead list", selectedList],
+                ["Campaign", name],
+                ["Agent", agent],
+                [
+                  selectedLists.length > 1 ? "Lead lists" : "Lead list",
+                  selectedLists.join(", ") || "None selected",
+                ],
                 ["Schedule", `${days.join(", ")} · 9:00–18:00 CET`],
-                ["Leads", "4,200"],
+                ["Leads", selectedLeadCount.toLocaleString()],
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-4">
                   <span className="text-ink-muted">{k}</span>

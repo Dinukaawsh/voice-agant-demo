@@ -1,14 +1,19 @@
 "use client";
 
-import { AgentCreationWizard } from "@/components/agents/AgentCreationWizard";
+import {
+  AgentCreationWizard,
+  type NewAgent,
+} from "@/components/agents/AgentCreationWizard";
 import { Modal } from "@/components/ui/Modal";
 
 export function AgentCreationModal({
   open,
   onClose,
+  onCreate,
 }: {
   open: boolean;
   onClose: () => void;
+  onCreate?: (agent: NewAgent) => void;
 }) {
   return (
     <Modal
@@ -20,7 +25,7 @@ export function AgentCreationModal({
       scrollable={false}
       bodyClassName="!py-4"
     >
-      <AgentCreationWizard onClose={onClose} onComplete={onClose} />
+      <AgentCreationWizard onClose={onClose} onComplete={onCreate} />
     </Modal>
   );
 }
