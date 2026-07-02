@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AI Voice Agent Mockup",
-  description: "AI Voice Agent Mockup — Twist Digital",
+  title: "Twist Voice — Demo Mockup",
+  description: "Beautiful UI mockup for AI Voice Agent platform demo",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
