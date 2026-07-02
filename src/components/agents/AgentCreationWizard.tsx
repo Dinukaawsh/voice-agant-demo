@@ -322,7 +322,7 @@ export function AgentCreationWizard({
               desc="Basic information about this calling agent."
             >
               <FormField label="Agent name">
-                <TextInput defaultValue="Health insurance FR — July" />
+                <TextInput defaultValue="Health insurance FR - July" />
               </FormField>
               <FormField label="Language">
                 <CustomSelect
@@ -380,7 +380,7 @@ export function AgentCreationWizard({
               <div className="rounded-xl border border-border bg-surface-subtle px-4 py-3.5">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-ink">
-                    Question 2 — Date of birth
+                    Question 2 - Date of birth
                   </span>
                   <Badge>Short answer</Badge>
                   <ChevronDown className="ml-auto h-4 w-4 text-ink-hint" />
@@ -403,7 +403,7 @@ export function AgentCreationWizard({
           {step === 5 && (
             <SectionCard
               title="Success recording"
-              desc="Final message after eligibility. Cannot be interrupted — call ends when it finishes."
+              desc="Final message after eligibility. Cannot be interrupted - call ends when it finishes."
             >
               <RecordingRow name="success_merci.mp3" />
             </SectionCard>
@@ -413,7 +413,7 @@ export function AgentCreationWizard({
             <>
               <SectionCard
                 title="Question edge cases"
-                desc='Objection answers tied to a specific question — e.g. "who are you?"'
+                desc='Objection answers tied to a specific question - e.g. "who are you?"'
                 optional
               >
                 <RecordingRow name="edge_qui_etes_vous.mp3" tag="Question 1" />
@@ -430,7 +430,7 @@ export function AgentCreationWizard({
               </SectionCard>
               <SectionCard
                 title="General edge cases"
-                desc='Can play at any point — e.g. "how did you get my number?"'
+                desc='Can play at any point - e.g. "how did you get my number?"'
                 optional
               >
                 <UploadZone>Upload general edge recording</UploadZone>
@@ -445,7 +445,7 @@ export function AgentCreationWizard({
               </SectionCard>
               <SectionCard
                 title="Silence prompt"
-                desc='"Are you still there?" — plays when the lead goes quiet.'
+                desc='"Are you still there?" - plays when the lead goes quiet.'
                 optional
               >
                 <UploadZone>Upload silence prompt</UploadZone>
@@ -461,7 +461,7 @@ export function AgentCreationWizard({
             >
               <div className="rounded-xl border border-border bg-surface-subtle p-3">
                 <p className="mb-2 text-[13px] font-semibold text-ink">
-                  Question 1 — type d&apos;assurance
+                  Question 1 - type d&apos;assurance
                   <Badge>2 variations</Badge>
                 </p>
                 <div className="space-y-2">

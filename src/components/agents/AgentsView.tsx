@@ -20,7 +20,7 @@ import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 
 const AGENTS = [
   {
-    name: "Health insurance FR — July",
+    name: "Health insurance FR - July",
     language: "French",
     status: "Live",
     calls: 1240,
@@ -28,7 +28,7 @@ const AGENTS = [
     updated: "2 days ago",
   },
   {
-    name: "Solar leads EN — Q3",
+    name: "Solar leads EN - Q3",
     language: "English",
     status: "Live",
     calls: 580,
@@ -36,7 +36,7 @@ const AGENTS = [
     updated: "5 days ago",
   },
   {
-    name: "Insurance ES — Pilot",
+    name: "Insurance ES - Pilot",
     language: "Spanish",
     status: "Testing",
     calls: 48,

@@ -14,28 +14,28 @@ import { Badge } from "@/components/ui/Badge";
 const RECENT_CALLS = [
   {
     lead: "Marie Dupont",
-    agent: "Health FR — July",
+    agent: "Health FR - July",
     status: "Qualified",
     duration: "4:32",
     time: "12 min ago",
   },
   {
     lead: "Jean Martin",
-    agent: "Health FR — July",
+    agent: "Health FR - July",
     status: "No answer",
-    duration: "—",
+    duration: "-",
     time: "28 min ago",
   },
   {
     lead: "Sophie Bernard",
-    agent: "Solar EN — Q3",
+    agent: "Solar EN - Q3",
     status: "Callback",
     duration: "2:18",
     time: "1 hr ago",
   },
   {
     lead: "Pierre Leroy",
-    agent: "Health FR — July",
+    agent: "Health FR - July",
     status: "Qualified",
     duration: "5:01",
     time: "2 hr ago",
@@ -43,8 +43,8 @@ const RECENT_CALLS = [
 ];
 
 const CAMPAIGN_PROGRESS = [
-  { name: "Health FR — July", pct: 68, calls: 1240, qualified: 312 },
-  { name: "Solar EN — Q3", pct: 34, calls: 580, qualified: 89 },
+  { name: "Health FR - July", pct: 68, calls: 1240, qualified: 312 },
+  { name: "Solar EN - Q3", pct: 34, calls: 580, qualified: 89 },
   { name: "Insurance ES", pct: 12, calls: 210, qualified: 24 },
 ];
 

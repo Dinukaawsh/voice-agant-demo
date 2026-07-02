@@ -15,8 +15,8 @@ import { CampaignCreationModal } from "@/components/campaigns/CampaignCreationMo
 
 const CAMPAIGNS = [
   {
-    name: "Health FR — July outbound",
-    agent: "Health insurance FR — July",
+    name: "Health FR - July outbound",
+    agent: "Health insurance FR - July",
     status: "Running",
     leads: 4200,
     called: 1240,
@@ -24,8 +24,8 @@ const CAMPAIGNS = [
     schedule: "Mon–Fri, 9am–6pm CET",
   },
   {
-    name: "Solar EN — Q3 push",
-    agent: "Solar leads EN — Q3",
+    name: "Solar EN - Q3 push",
+    agent: "Solar leads EN - Q3",
     status: "Running",
     leads: 2800,
     called: 580,
@@ -34,7 +34,7 @@ const CAMPAIGNS = [
   },
   {
     name: "Insurance ES pilot",
-    agent: "Insurance ES — Pilot",
+    agent: "Insurance ES - Pilot",
     status: "Paused",
     leads: 950,
     called: 210,
@@ -42,7 +42,7 @@ const CAMPAIGNS = [
     schedule: "Paused by admin",
   },
   {
-    name: "Mutuelle FR — August",
+    name: "Mutuelle FR - August",
     agent: "Mutuelle comparison FR",
     status: "Draft",
     leads: 0,
@@ -141,7 +141,7 @@ export function CampaignsView() {
                             </div>
                           </div>
                         ) : (
-                          <span className="text-ink-hint">—</span>
+                          <span className="text-ink-hint">-</span>
                         )}
                       </td>
                       <td className="px-3 py-4 text-right font-medium text-ink">

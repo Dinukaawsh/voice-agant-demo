@@ -6,6 +6,7 @@ import {
   Users,
   ClipboardCheck,
   CreditCard,
+  UserCog,
 } from "lucide-react";
 
 export type NavItem = {
@@ -51,6 +52,12 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/billing",
     icon: CreditCard,
     description: "Cost analyser and usage billing",
+  },
+  {
+    label: "Account",
+    href: "/account",
+    icon: UserCog,
+    description: "Profile, organization, and preferences",
   },
 ];
 

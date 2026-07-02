@@ -2,17 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, LogOut, Mic2, X } from "lucide-react";
+import { LogOut, Mic2, X } from "lucide-react";
 import { NAV_ITEMS } from "@/config/navigation";
 
 export function Sidebar({
   collapsed,
-  onToggleCollapsed,
   mobileOpen,
   onCloseMobile,
 }: {
   collapsed: boolean;
-  onToggleCollapsed: () => void;
   mobileOpen: boolean;
   onCloseMobile: () => void;
 }) {
@@ -102,18 +100,6 @@ export function Sidebar({
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign out</span>}
-        </button>
-        <button
-          type="button"
-          onClick={onToggleCollapsed}
-          className="mt-1 hidden w-full items-center justify-center rounded-lg p-2 text-ink-hint transition-colors hover:bg-sidebar-hover hover:text-ink-muted lg:flex"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
         </button>
       </div>
     </aside>

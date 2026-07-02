@@ -15,7 +15,7 @@ export function AgentCreationModal({
       open={open}
       onClose={onClose}
       title="Create a new agent"
-      subtitle="Upload recordings in the order the call happens — no technical choices needed."
+      subtitle="Upload recordings in the order the call happens - no technical choices needed."
       size="2xl"
       scrollable={false}
       bodyClassName="!py-4"

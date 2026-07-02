@@ -12,9 +12,9 @@ import { Badge } from "@/components/ui/Badge";
 const REVIEW_QUEUE = [
   {
     name: "Marie Dupont",
-    phone: "+33 6 12 34 56 78",
-    agent: "Health FR — July",
-    campaign: "Health FR — July outbound",
+    phone: "+33 612 345 678",
+    agent: "Health FR - July",
+    campaign: "Health FR - July outbound",
     score: 92,
     duration: "4:32",
     summary: "Interested in mutuelle comparison. Current billing €142/mo. Age 58.",
@@ -22,9 +22,9 @@ const REVIEW_QUEUE = [
   },
   {
     name: "Pierre Leroy",
-    phone: "+33 6 55 44 33 22",
-    agent: "Health FR — July",
-    campaign: "Health FR — July outbound",
+    phone: "+33 655 443 322",
+    agent: "Health FR - July",
+    campaign: "Health FR - July outbound",
     score: 88,
     duration: "5:01",
     summary: "Has existing coverage, open to switching. Mentioned dental add-on.",
@@ -32,9 +32,9 @@ const REVIEW_QUEUE = [
   },
   {
     name: "Isabelle Roux",
-    phone: "+33 6 33 22 11 00",
-    agent: "Solar EN — Q3",
-    campaign: "Solar EN — Q3 push",
+    phone: "+33 633 221 100",
+    agent: "Solar EN - Q3",
+    campaign: "Solar EN - Q3 push",
     score: 76,
     duration: "3:44",
     summary: "Homeowner, south-facing roof. Wants callback next week.",

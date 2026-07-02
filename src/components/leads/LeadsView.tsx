@@ -47,8 +47,8 @@ const LEADS: LeadRow[] = [
   {
     id: "1",
     name: "Marie Dupont",
-    phone: "+33 6 12 34 56 78",
-    list: "Health FR — July",
+    phone: "+33 612 345 678",
+    list: "Health FR - July",
     status: "Qualified",
     lastCall: "Today, 14:32",
     attempts: 1,
@@ -56,8 +56,8 @@ const LEADS: LeadRow[] = [
   {
     id: "2",
     name: "Jean Martin",
-    phone: "+33 6 98 76 54 32",
-    list: "Health FR — July",
+    phone: "+33 698 765 432",
+    list: "Health FR - July",
     status: "No answer",
     lastCall: "Today, 13:58",
     attempts: 3,
@@ -65,8 +65,8 @@ const LEADS: LeadRow[] = [
   {
     id: "3",
     name: "Sophie Bernard",
-    phone: "+33 7 11 22 33 44",
-    list: "Solar EN — Q3",
+    phone: "+33 711 223 344",
+    list: "Solar EN - Q3",
     status: "Callback",
     lastCall: "Today, 12:15",
     attempts: 2,
@@ -74,8 +74,8 @@ const LEADS: LeadRow[] = [
   {
     id: "4",
     name: "Pierre Leroy",
-    phone: "+33 6 55 44 33 22",
-    list: "Health FR — July",
+    phone: "+33 655 443 322",
+    list: "Health FR - July",
     status: "Qualified",
     lastCall: "Yesterday",
     attempts: 1,
@@ -83,10 +83,10 @@ const LEADS: LeadRow[] = [
   {
     id: "5",
     name: "Claire Moreau",
-    phone: "+33 6 77 88 99 00",
-    list: "Health FR — July",
+    phone: "+33 677 889 900",
+    list: "Health FR - July",
     status: "Not called",
-    lastCall: "—",
+    lastCall: "-",
     attempts: 0,
   },
   {

@@ -14,14 +14,14 @@ const STEPS = [
 ] as const;
 
 const AGENTS = [
-  "Health insurance FR — July",
-  "Solar leads EN — Q3",
-  "Insurance ES — Pilot",
+  "Health insurance FR - July",
+  "Solar leads EN - Q3",
+  "Insurance ES - Pilot",
 ];
 
 const LEAD_LISTS = [
-  { name: "Health FR — July list", count: 4200 },
-  { name: "Solar EN — Q3 prospects", count: 2800 },
+  { name: "Health FR - July list", count: 4200 },
+  { name: "Solar EN - Q3 prospects", count: 2800 },
   { name: "Insurance ES pilot batch", count: 950 },
 ];
 
@@ -113,7 +113,7 @@ export function CampaignCreationModal({
           <Label>Campaign name</Label>
           <input
             type="text"
-            defaultValue="Health FR — August outbound"
+            defaultValue="Health FR - August outbound"
             className="w-full rounded-lg border border-border-strong bg-surface px-3 py-2.5 text-sm outline-none focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-soft)]"
           />
           <Label>Voice agent</Label>
@@ -232,7 +232,7 @@ export function CampaignCreationModal({
             </p>
             <div className="mt-3 space-y-2.5 text-[13.5px]">
               {[
-                ["Campaign", "Health FR — August outbound"],
+                ["Campaign", "Health FR - August outbound"],
                 ["Agent", AGENTS[0]],
                 ["Lead list", selectedList],
                 ["Schedule", `${days.join(", ")} · 9:00–18:00 CET`],

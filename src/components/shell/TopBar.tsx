@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Menu, Search } from "lucide-react";
 import { getPageMeta } from "@/config/navigation";
@@ -45,7 +46,10 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           <Bell className="h-4 w-4" />
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-accent" />
         </button>
-        <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface py-1.5 pl-1.5 pr-3 shadow-sm">
+        <Link
+          href="/account"
+          className="flex items-center gap-2.5 rounded-xl border border-border bg-surface py-1.5 pl-1.5 pr-3 shadow-sm transition-colors hover:border-accent/30 hover:bg-accent-soft"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-xs font-semibold text-white">
             TD
           </div>
@@ -55,7 +59,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
             </p>
             <p className="text-[11px] text-ink-hint">Twist Digital</p>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );
