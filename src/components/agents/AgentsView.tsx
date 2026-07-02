@@ -19,6 +19,7 @@ import { AgentCreationModal } from "@/components/agents/AgentCreationModal";
 import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 
 type AgentRow = {
+  id: string;
   name: string;
   language: string;
   status: string;
@@ -29,6 +30,7 @@ type AgentRow = {
 
 const INITIAL_AGENTS: AgentRow[] = [
   {
+    id: "health-fr-july",
     name: "Health insurance FR - July",
     language: "French",
     status: "Live",
@@ -37,6 +39,7 @@ const INITIAL_AGENTS: AgentRow[] = [
     updated: "2 days ago",
   },
   {
+    id: "solar-en-q3",
     name: "Solar leads EN - Q3",
     language: "English",
     status: "Live",
@@ -45,6 +48,7 @@ const INITIAL_AGENTS: AgentRow[] = [
     updated: "5 days ago",
   },
   {
+    id: "insurance-es-pilot",
     name: "Insurance ES - Pilot",
     language: "Spanish",
     status: "Testing",
@@ -53,6 +57,7 @@ const INITIAL_AGENTS: AgentRow[] = [
     updated: "1 week ago",
   },
   {
+    id: "mutuelle-fr",
     name: "Mutuelle comparison FR",
     language: "French",
     status: "Draft",
@@ -76,6 +81,7 @@ export function AgentsView() {
   function handleCreateAgent(agent: { name: string; language: string }) {
     setAgents((prev) => [
       {
+        id: crypto.randomUUID(),
         name: agent.name,
         language: agent.language,
         status: "Draft",
@@ -132,7 +138,7 @@ export function AgentsView() {
           <div className="grid gap-4 md:grid-cols-2">
             {agents.map((agent) => (
               <Card
-                key={agent.name}
+                key={agent.id}
                 className="group transition-all hover:border-accent/25 hover:shadow-card"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -254,7 +260,7 @@ export function AgentsView() {
               <tbody>
                 {agents.map((agent) => (
                   <tr
-                    key={agent.name}
+                    key={agent.id}
                     className="border-b border-border/60 transition-colors last:border-0 hover:bg-surface-subtle"
                   >
                     <td className="px-5 py-4">

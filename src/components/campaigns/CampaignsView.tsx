@@ -17,6 +17,7 @@ import {
 } from "@/components/campaigns/CampaignCreationModal";
 
 type CampaignRow = {
+  id: string;
   name: string;
   agent: string;
   status: string;
@@ -28,6 +29,7 @@ type CampaignRow = {
 
 const INITIAL_CAMPAIGNS: CampaignRow[] = [
   {
+    id: "health-fr-july-outbound",
     name: "Health FR - July outbound",
     agent: "Health insurance FR - July",
     status: "Running",
@@ -37,6 +39,7 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     schedule: "Mon–Fri, 9am–6pm CET",
   },
   {
+    id: "solar-en-q3-push",
     name: "Solar EN - Q3 push",
     agent: "Solar leads EN - Q3",
     status: "Running",
@@ -46,6 +49,7 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     schedule: "Mon–Sat, 10am–5pm GMT",
   },
   {
+    id: "insurance-es-pilot",
     name: "Insurance ES pilot",
     agent: "Insurance ES - Pilot",
     status: "Paused",
@@ -55,6 +59,7 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     schedule: "Paused by admin",
   },
   {
+    id: "mutuelle-fr-august",
     name: "Mutuelle FR - August",
     agent: "Mutuelle comparison FR",
     status: "Draft",
@@ -76,7 +81,7 @@ export function CampaignsView() {
   const [campaigns, setCampaigns] = useState<CampaignRow[]>(INITIAL_CAMPAIGNS);
 
   function handleCreateCampaign(campaign: NewCampaign) {
-    setCampaigns((prev) => [campaign, ...prev]);
+    setCampaigns((prev) => [{ id: crypto.randomUUID(), ...campaign }, ...prev]);
   }
 
   return (
@@ -118,7 +123,7 @@ export function CampaignsView() {
 
                   return (
                     <tr
-                      key={c.name}
+                      key={c.id}
                       className="group border-b border-border/60 transition-colors last:border-0 hover:bg-surface-subtle"
                     >
                       <td className="px-5 py-4">
