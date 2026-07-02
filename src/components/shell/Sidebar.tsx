@@ -27,8 +27,10 @@ export function Sidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 lg:static ${
-        mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      className={`z-40 flex h-full shrink-0 flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 ${
+        mobileOpen
+          ? "fixed inset-y-0 left-0 translate-x-0"
+          : "fixed inset-y-0 left-0 -translate-x-full lg:static lg:translate-x-0"
       } ${collapsed ? "w-[72px]" : "w-[248px]"}`}
     >
       <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">

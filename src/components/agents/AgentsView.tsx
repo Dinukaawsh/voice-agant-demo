@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { AgentCreationModal } from "@/components/agents/AgentCreationModal";
+import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 
 const AGENTS = [
   {
@@ -128,13 +129,24 @@ export function AgentsView() {
                       </div>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="rounded-lg p-1.5 text-ink-hint opacity-0 transition-opacity hover:bg-surface-muted hover:text-ink group-hover:opacity-100"
-                    aria-label="More options"
+                  <CustomDropdown
+                    align="right"
+                    menuWidth={176}
+                    trigger={
+                      <button
+                        type="button"
+                        className="rounded-lg p-1.5 text-ink-hint opacity-0 transition-opacity hover:bg-surface-muted hover:text-ink group-hover:opacity-100"
+                        aria-label="More options"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    }
                   >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
+                    <DropdownItem>Edit agent</DropdownItem>
+                    <DropdownItem>Clone</DropdownItem>
+                    <DropdownItem>Test call</DropdownItem>
+                    <DropdownItem danger>Archive</DropdownItem>
+                  </CustomDropdown>
                 </div>
 
                 <div className="mt-5 grid grid-cols-3 gap-3 border-t border-border pt-4">
@@ -243,12 +255,22 @@ export function AgentsView() {
                     </td>
                     <td className="px-3 py-4 text-ink-muted">{agent.updated}</td>
                     <td className="px-5 py-4">
-                      <button
-                        type="button"
-                        className="rounded-lg p-1.5 text-ink-hint hover:bg-surface-muted hover:text-ink"
+                      <CustomDropdown
+                        align="right"
+                        menuWidth={176}
+                        trigger={
+                          <button
+                            type="button"
+                            className="rounded-lg p-1.5 text-ink-hint hover:bg-surface-muted hover:text-ink"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </button>
+                        }
                       >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                        <DropdownItem>Edit agent</DropdownItem>
+                        <DropdownItem>Test call</DropdownItem>
+                        <DropdownItem danger>Archive</DropdownItem>
+                      </CustomDropdown>
                     </td>
                   </tr>
                 ))}
