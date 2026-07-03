@@ -582,7 +582,7 @@ export function AgentCreationWizard({
           <Button variant="secondary" className="w-full" onClick={() => onClose?.()}>
             Cancel
           </Button>
-          <Button className="w-full gap-2" onClick={handleNext}>
+          <Button color="violet" className="w-full gap-2" onClick={handleNext}>
             {step === 8 ? "Create agent" : "Next"}
             {step < 8 && <ArrowRight className="h-4 w-4" />}
           </Button>

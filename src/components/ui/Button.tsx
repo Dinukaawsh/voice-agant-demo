@@ -1,25 +1,43 @@
-type ButtonVariant = "primary" | "secondary" | "ghost";
+import { cn } from "@/lib/cn";
 
-const variants: Record<ButtonVariant, string> = {
-  primary:
-    "bg-accent text-white shadow-sm shadow-accent/20 hover:bg-accent-hover",
-  secondary:
-    "border border-border bg-surface text-ink-muted hover:border-accent/30 hover:text-accent hover:bg-accent-soft",
-  ghost: "text-ink-muted hover:bg-surface-muted hover:text-ink",
+export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonColor = "violet" | "blue" | "neutral";
+
+const variantColorMap: Record<ButtonVariant, ButtonColor> = {
+  primary: "violet",
+  secondary: "neutral",
+  ghost: "neutral",
+};
+
+const colorClass: Record<ButtonColor, string> = {
+  violet: "btn-theme-violet",
+  blue: "btn-theme-blue",
+  neutral: "btn-theme-neutral",
 };
 
 export function Button({
   children,
   variant = "primary",
+  color,
   className = "",
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
+  /** Accent color — primary defaults to violet (agents theme) */
+  color?: ButtonColor;
 }) {
+  const resolvedColor = color ?? variantColorMap[variant];
+  const themeClass =
+    variant === "ghost" ? "btn-theme-ghost" : colorClass[resolvedColor];
+
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13.5px] font-medium transition-all disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={cn(
+        "btn-theme inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-semibold disabled:cursor-not-allowed disabled:opacity-50",
+        themeClass,
+        className,
+      )}
       {...props}
     >
       {children}

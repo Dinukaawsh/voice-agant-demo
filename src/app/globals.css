@@ -323,3 +323,88 @@ body {
 .slide-panel-enter {
   animation: slide-panel-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Theme buttons — sidebar-style fill + neon hover */
+.btn-theme {
+  position: relative;
+  border-width: 2px;
+  border-style: solid;
+  transition:
+    color 0.28s ease,
+    background 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease,
+    transform 0.2s ease;
+}
+
+.btn-theme:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-theme:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-theme-violet {
+  border-color: rgb(139 92 246);
+  background: white;
+  color: rgb(124 58 237);
+}
+
+.btn-theme-violet:hover:not(:disabled) {
+  border-color: transparent;
+  color: white;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.4),
+    0 0 20px rgb(139 92 246 / 0.55),
+    0 0 40px rgb(99 102 241 / 0.28);
+}
+
+.btn-theme-blue {
+  border-color: rgb(59 130 246);
+  background: white;
+  color: rgb(37 99 235);
+}
+
+.btn-theme-blue:hover:not(:disabled) {
+  border-color: transparent;
+  color: white;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #4f46e5 100%);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.4),
+    0 0 20px rgb(59 130 246 / 0.55),
+    0 0 40px rgb(79 70 229 / 0.25);
+}
+
+.btn-theme-neutral {
+  border-color: rgb(203 213 225);
+  background: white;
+  color: rgb(100 116 139);
+}
+
+.btn-theme-neutral:hover:not(:disabled) {
+  border-color: transparent;
+  color: rgb(15 23 42);
+  background: white;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 3px #22d3ee,
+    0 0 0 5px #8b5cf6,
+    0 0 0 7px #ec4899,
+    0 0 22px rgb(139 92 246 / 0.45),
+    0 0 36px rgb(34 211 238 / 0.25);
+}
+
+.btn-theme-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: rgb(100 116 139);
+}
+
+.btn-theme-ghost:hover:not(:disabled) {
+  border-color: rgb(226 232 240);
+  background: rgb(248 250 252);
+  color: rgb(15 23 42);
+  box-shadow: 0 0 16px rgb(139 92 246 / 0.12);
+}
