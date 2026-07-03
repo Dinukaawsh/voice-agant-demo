@@ -155,7 +155,8 @@ export type NewCampaign = {
   agent: string;
   status: string;
   leads: number;
-  called: number;
+  dialed: number;
+  answered: number;
   qualified: number;
   schedule: string;
 };
@@ -207,7 +208,8 @@ export function CampaignCreationWizard({
       agent,
       status: "Running",
       leads: selectedLeadCount,
-      called: 0,
+      dialed: 0,
+      answered: 0,
       qualified: 0,
       schedule: `${days.join(", ")} · 9:00-18:00 ${timezoneLabel}`,
     });

@@ -659,10 +659,10 @@ export function LeadsView() {
           },
         ]}
         footer={
-          !selectAllFiltered && allPageSelected && TOTAL_LEADS > LEADS.length ? (
+          !selectAllFiltered && allPageSelected && TOTAL_LEADS > pageIds.length ? (
             <div className="border-t border-violet-200 bg-violet-50 px-4 py-2.5 text-center">
               <span className="text-[12px] text-ink-muted">
-                All {LEADS.length} leads on this page are selected.{" "}
+                All {pageIds.length} leads on this page are selected.{" "}
                 <button
                   type="button"
                   onClick={selectAllMatching}

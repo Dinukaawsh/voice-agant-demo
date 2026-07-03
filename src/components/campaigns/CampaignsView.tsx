@@ -30,7 +30,8 @@ type CampaignRow = {
   agent: string;
   status: string;
   leads: number;
-  called: number;
+  dialed: number;
+  answered: number;
   qualified: number;
   schedule: string;
 };
@@ -42,8 +43,9 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     agent: "Health insurance FR - July",
     status: "Running",
     leads: 4200,
-    called: 1240,
-    qualified: 312,
+    dialed: 908,
+    answered: 201,
+    qualified: 5,
     schedule: "Mon–Fri, 9am–6pm CET",
   },
   {
@@ -52,7 +54,8 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     agent: "Solar leads EN - Q3",
     status: "Running",
     leads: 2800,
-    called: 580,
+    dialed: 580,
+    answered: 142,
     qualified: 89,
     schedule: "Mon–Sat, 10am–5pm GMT",
   },
@@ -62,7 +65,8 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     agent: "Insurance ES - Pilot",
     status: "Paused",
     leads: 950,
-    called: 210,
+    dialed: 210,
+    answered: 48,
     qualified: 24,
     schedule: "Paused by admin",
   },
@@ -72,7 +76,8 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     agent: "Mutuelle comparison FR",
     status: "Draft",
     leads: 0,
-    called: 0,
+    dialed: 0,
+    answered: 0,
     qualified: 0,
     schedule: "Not scheduled",
   },
@@ -104,6 +109,40 @@ function progressGradient(status: string) {
   return "from-orange-500 via-rose-500 to-violet-500";
 }
 
+const CAMPAIGN_ROW_GRID =
+  "lg:grid-cols-[minmax(200px,1.25fr)_84px_minmax(120px,0.8fr)_minmax(300px,1.6fr)_72px]";
+
+function formatCampaignRate(value: number) {
+  return `${value.toFixed(2)}%`;
+}
+
+function campaignDetailStats(campaign: CampaignRow) {
+  const notAnswered = Math.max(campaign.dialed - campaign.answered, 0);
+  const answerRate = campaign.dialed > 0 ? (campaign.answered / campaign.dialed) * 100 : 0;
+  const convRate = campaign.dialed > 0 ? (campaign.qualified / campaign.dialed) * 100 : 0;
+
+  return { notAnswered, answerRate, convRate };
+}
+
+function CampaignDetailMetric({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="min-w-0 text-center lg:text-right">
+      <p className={cn("truncate tabular-nums text-[14px] font-semibold leading-tight text-ink", valueClassName)}>
+        {value}
+      </p>
+      <p className="mt-0.5 truncate text-[10px] font-medium uppercase tracking-wide text-ink-hint">{label}</p>
+    </div>
+  );
+}
+
 export function CampaignsView() {
   const [createOpen, setCreateOpen] = useState(false);
   const [campaigns, setCampaigns] = useState<CampaignRow[]>(INITIAL_CAMPAIGNS);
@@ -123,12 +162,12 @@ export function CampaignsView() {
   const metrics = useMemo(() => {
     const running = campaigns.filter((c) => c.status === "Running").length;
     const totalLeads = campaigns.reduce((s, c) => s + c.leads, 0);
-    const totalCalled = campaigns.reduce((s, c) => s + c.called, 0);
+    const totalDialed = campaigns.reduce((s, c) => s + c.dialed, 0);
     const totalQualified = campaigns.reduce((s, c) => s + c.qualified, 0);
     const convRate =
-      totalCalled > 0 ? Math.round((totalQualified / totalCalled) * 100) : 0;
+      totalDialed > 0 ? Math.round((totalQualified / totalDialed) * 100) : 0;
 
-    return { running, totalLeads, totalCalled, totalQualified, convRate };
+    return { running, totalLeads, totalDialed, totalQualified, convRate };
   }, [campaigns]);
 
   const activeFilterCount = [
@@ -148,8 +187,8 @@ export function CampaignsView() {
       if (sortBy === "leads") return b.leads - a.leads;
       if (sortBy === "qualified") return b.qualified - a.qualified;
       if (sortBy === "progress") {
-        const pa = a.leads > 0 ? a.called / a.leads : 0;
-        const pb = b.leads > 0 ? b.called / b.leads : 0;
+        const pa = a.leads > 0 ? a.dialed / a.leads : 0;
+        const pb = b.leads > 0 ? b.dialed / b.leads : 0;
         return pb - pa;
       }
       return 0;
@@ -189,7 +228,7 @@ export function CampaignsView() {
     },
     {
       label: "Calls placed",
-      value: metrics.totalCalled.toLocaleString(),
+      value: metrics.totalDialed.toLocaleString(),
       sub: "Outbound dials",
       icon: PhoneCall,
       tone: "violet" as const,
@@ -355,21 +394,18 @@ export function CampaignsView() {
 
         <Card className="overflow-hidden p-0">
           {/* Desktop header */}
-          <div className="hidden border-b border-border bg-gradient-to-r from-orange-50/50 via-white to-violet-50/30 px-5 py-3 lg:grid lg:grid-cols-[minmax(200px,1.5fr)_minmax(120px,1fr)_90px_minmax(140px,1fr)_repeat(3,72px)_72px] lg:items-center lg:gap-3">
+          <div className={cn("hidden border-b border-border bg-gradient-to-r from-orange-50/50 via-white to-violet-50/30 px-5 py-3 lg:grid lg:items-center lg:gap-3", CAMPAIGN_ROW_GRID)}>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Campaign</span>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Agent</span>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Status</span>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Progress</span>
-            <span className="text-right text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Leads</span>
-            <span className="text-right text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Called</span>
-            <span className="text-right text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Qual.</span>
-            <span />
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Campaign details</span>
+            <span className="text-right text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Actions</span>
           </div>
 
           <div className="divide-y divide-border/60">
             {filteredCampaigns.map((c) => {
-              const progress = c.leads > 0 ? Math.round((c.called / c.leads) * 100) : 0;
-              const convRate = c.called > 0 ? Math.round((c.qualified / c.called) * 100) : 0;
+              const progress = c.leads > 0 ? Math.round((c.dialed / c.leads) * 100) : 0;
+              const { notAnswered, answerRate, convRate } = campaignDetailStats(c);
 
               return (
                 <div
@@ -379,7 +415,7 @@ export function CampaignsView() {
                     statusAccent(c.status),
                   )}
                 >
-                  <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(200px,1.5fr)_minmax(120px,1fr)_90px_minmax(140px,1fr)_repeat(3,72px)_72px] lg:items-center lg:gap-3">
+                  <div className={cn("flex flex-col gap-4 lg:grid lg:items-center lg:gap-3", CAMPAIGN_ROW_GRID)}>
                     {/* Campaign */}
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 text-white shadow-md shadow-orange-500/20">
@@ -390,12 +426,6 @@ export function CampaignsView() {
                         <p className="truncate text-[12px] text-ink-hint">{c.schedule}</p>
                       </div>
                     </div>
-
-                    {/* Agent */}
-                    <p className="truncate text-[13px] text-ink-muted lg:text-[12.5px]">
-                      <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">Agent · </span>
-                      {c.agent}
-                    </p>
 
                     {/* Status */}
                     <div>
@@ -410,8 +440,8 @@ export function CampaignsView() {
                           <span className="lg:hidden">Progress · </span>
                           {c.leads > 0 ? `${progress}%` : "—"}
                         </span>
-                        {c.called > 0 && (
-                          <span className="text-ink-hint">{convRate}% conv.</span>
+                        {c.dialed > 0 && (
+                          <span className="text-ink-hint">{c.leads.toLocaleString()} leads</span>
                         )}
                       </div>
                       {c.leads > 0 ? (
@@ -426,21 +456,37 @@ export function CampaignsView() {
                       )}
                     </div>
 
-                    {/* Stats */}
-                    <p className="text-right tabular-nums lg:block">
-                      <span className="text-[10px] font-semibold uppercase text-ink-hint lg:hidden">Leads </span>
-                      <span className="font-semibold text-ink">{c.leads.toLocaleString()}</span>
-                    </p>
-                    <p className="text-right tabular-nums text-ink-muted lg:block">
-                      <span className="text-[10px] font-semibold uppercase text-ink-hint lg:hidden">Called </span>
-                      {c.called.toLocaleString()}
-                    </p>
-                    <p className="text-right tabular-nums lg:block">
-                      <span className="text-[10px] font-semibold uppercase text-ink-hint lg:hidden">Qualified </span>
-                      <span className="inline-flex min-w-[2rem] justify-end rounded-lg bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700 ring-1 ring-emerald-200/80">
-                        {c.qualified}
+                    <div className="min-w-0">
+                      <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">
+                        Campaign details
                       </span>
-                    </p>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-3 rounded-xl border border-border/70 bg-surface-subtle/60 px-3 py-2.5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-2 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0">
+                        <CampaignDetailMetric
+                          label="Dialed"
+                          value={c.dialed > 0 ? c.dialed.toLocaleString() : "—"}
+                        />
+                        <CampaignDetailMetric
+                          label="Answered"
+                          value={c.dialed > 0 ? c.answered.toLocaleString() : "—"}
+                          valueClassName="text-emerald-600"
+                        />
+                        <CampaignDetailMetric
+                          label="Not Answered"
+                          value={c.dialed > 0 ? notAnswered.toLocaleString() : "—"}
+                          valueClassName="text-rose-600"
+                        />
+                        <CampaignDetailMetric
+                          label="Answer Rate"
+                          value={c.dialed > 0 ? formatCampaignRate(answerRate) : "—"}
+                          valueClassName="text-blue-600"
+                        />
+                        <CampaignDetailMetric
+                          label="Conv. Rate"
+                          value={c.dialed > 0 ? formatCampaignRate(convRate) : "—"}
+                          valueClassName="text-violet-600"
+                        />
+                      </div>
+                    </div>
 
                     {/* Actions */}
                     <div className="flex items-center justify-end gap-1.5 lg:opacity-70 lg:transition-opacity lg:group-hover:opacity-100">
