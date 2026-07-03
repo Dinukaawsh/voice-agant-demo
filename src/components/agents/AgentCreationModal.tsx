@@ -4,7 +4,8 @@ import {
   AgentCreationWizard,
   type NewAgent,
 } from "@/components/agents/AgentCreationWizard";
-import { Modal } from "@/components/ui/Modal";
+import { SlidePanel } from "@/components/ui/SlidePanel";
+import { Sparkles } from "lucide-react";
 
 export function AgentCreationModal({
   open,
@@ -16,16 +17,21 @@ export function AgentCreationModal({
   onCreate?: (agent: NewAgent) => void;
 }) {
   return (
-    <Modal
+    <SlidePanel
       open={open}
       onClose={onClose}
-      title="Create a new agent"
-      subtitle="Upload recordings in the order the call happens - no technical choices needed."
-      size="2xl"
-      scrollable={false}
-      bodyClassName="!py-4"
+      title="Create voice agent"
+      subtitle="Build your agent step by step — upload recordings in call order."
+      headerExtra={
+        <div className="border-t border-blue-100/80 bg-gradient-to-r from-blue-50 via-indigo-50/80 to-violet-50 px-5 py-2.5 sm:px-6">
+          <div className="flex items-center gap-2 text-[12px] font-medium text-blue-800">
+            <Sparkles className="h-3.5 w-3.5 text-violet-600" />
+            Guided setup · 8 steps · ~5 min
+          </div>
+        </div>
+      }
     >
       <AgentCreationWizard onClose={onClose} onComplete={onCreate} />
-    </Modal>
+    </SlidePanel>
   );
 }
