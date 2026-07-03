@@ -113,6 +113,39 @@ const SORT_OPTIONS = [
   { value: "name", label: "Name A–Z" },
 ];
 
+const LEAD_AVATAR_GRADIENTS = [
+  "from-blue-500 to-indigo-600",
+  "from-slate-400 to-slate-600",
+  "from-orange-500 to-rose-500",
+  "from-violet-500 to-purple-600",
+  "from-cyan-500 to-teal-600",
+  "from-emerald-500 to-green-600",
+] as const;
+
+function leadInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2);
+}
+
+function leadAvatarGradient(id: string) {
+  const index = (parseInt(id, 10) - 1) % LEAD_AVATAR_GRADIENTS.length;
+  return LEAD_AVATAR_GRADIENTS[index];
+}
+
+function formatLeadPhone(phone: string) {
+  const match = phone.trim().match(/^(\+\d+)\s*(.*)$/);
+  if (!match) {
+    return { prefix: null as string | null, number: phone.replace(/\s+/g, "") };
+  }
+  return {
+    prefix: match[1],
+    number: match[2].replace(/\s+/g, ""),
+  };
+}
+
 export function LeadsView() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectAllFiltered, setSelectAllFiltered] = useState(false);
@@ -374,6 +407,7 @@ export function LeadsView() {
           <div className="divide-y divide-border/60">
             {filteredLeads.map((lead) => {
               const isSelected = selectAllFiltered || selectedIds.has(lead.id);
+              const phoneParts = formatLeadPhone(lead.phone);
 
               return (
                 <div
@@ -396,19 +430,27 @@ export function LeadsView() {
                     </div>
 
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-cyan-600 bg-cyan-200 text-sm font-bold text-cyan-600">
-                        {lead.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .slice(0, 2)}
+                      <div
+                        className={cn(
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[12px] font-bold text-white shadow-sm",
+                          leadAvatarGradient(lead.id),
+                        )}
+                      >
+                        {leadInitials(lead.name)}
                       </div>
-                      <p className="truncate font-semibold text-ink">{lead.name}</p>
+                      <p className="truncate text-[13px] font-semibold text-ink">{lead.name}</p>
                     </div>
 
                     <p className="font-mono text-[13px] text-ink-muted">
                       <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">Phone · </span>
-                      {lead.phone}
+                      {phoneParts.prefix ? (
+                        <>
+                          <span className="text-ink-hint">{phoneParts.prefix}</span>
+                          <span className="ml-2 text-ink-muted">{phoneParts.number}</span>
+                        </>
+                      ) : (
+                        phoneParts.number
+                      )}
                     </p>
 
                     <p className="truncate text-[13px] text-ink-muted">

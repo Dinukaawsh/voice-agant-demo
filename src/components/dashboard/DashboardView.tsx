@@ -286,54 +286,58 @@ export function DashboardView() {
           </div>
 
           <div className="relative">
-            <svg
-              viewBox="0 0 400 160"
-              className="mb-2 h-44 w-full"
-              preserveAspectRatio="none"
-              aria-hidden
-            >
-              <defs>
-                <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.02" />
-                </linearGradient>
-                <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#2563eb" />
-                  <stop offset="100%" stopColor="#7c3aed" />
-                </linearGradient>
-              </defs>
-              {[40, 80, 120].map((y) => (
-                <line
-                  key={y}
-                  x1="0"
-                  y1={y}
-                  x2="400"
-                  y2={y}
-                  stroke="#e2e8f0"
-                  strokeDasharray="4 4"
+            <div className="relative mb-2 h-44 w-full">
+              <svg
+                viewBox="0 0 400 160"
+                className="h-full w-full"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <defs>
+                  <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.02" />
+                  </linearGradient>
+                  <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#2563eb" />
+                    <stop offset="100%" stopColor="#7c3aed" />
+                  </linearGradient>
+                </defs>
+                {[40, 80, 120].map((y) => (
+                  <line
+                    key={y}
+                    x1="0"
+                    y1={y}
+                    x2="400"
+                    y2={y}
+                    stroke="#e2e8f0"
+                    strokeDasharray="4 4"
+                  />
+                ))}
+                <path d={chart.area} fill="url(#chartFill)" />
+                <path
+                  d={chart.line}
+                  fill="none"
+                  stroke="url(#chartLine)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
-              ))}
-              <path d={chart.area} fill="url(#chartFill)" />
-              <path
-                d={chart.line}
-                fill="none"
-                stroke="url(#chartLine)"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {chart.points.map((p, i) => (
-                <circle
-                  key={CALL_VOLUME[i].day}
-                  cx={p.x}
-                  cy={p.y}
-                  r="4"
-                  fill="white"
-                  stroke="#3b82f6"
-                  strokeWidth="2"
-                />
-              ))}
-            </svg>
+              </svg>
+              <div className="pointer-events-none absolute inset-0" aria-hidden>
+                {chart.points.map((p, i) => (
+                  <span
+                    key={CALL_VOLUME[i].day}
+                    className="absolute box-border h-2 w-2 rounded-full border-2 border-blue-500 bg-white"
+                    style={{
+                      left: `${(p.x / 400) * 100}%`,
+                      top: `${(p.y / 160) * 100}%`,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
             <div className="flex justify-between px-1">
               {CALL_VOLUME.map((d, i) => (
                 <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
