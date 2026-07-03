@@ -7,12 +7,18 @@ import {
   PhoneMissed,
   PhoneOutgoing,
 } from "lucide-react";
+import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 import { cn } from "@/lib/cn";
 
-type StatusKey = "Qualified" | "Callback" | "In progress" | "No answer" | "Not called";
+export type LeadStatusKey =
+  | "Qualified"
+  | "Callback"
+  | "In progress"
+  | "No answer"
+  | "Not called";
 
 const STATUS_META: Record<
-  StatusKey,
+  LeadStatusKey,
   { label: string; hint: string; chip: string; bar?: string }
 > = {
   Qualified: {
@@ -62,7 +68,7 @@ function StatusTooltip({
   );
 }
 
-function StatusIcon({ status, barClass }: { status: StatusKey; barClass?: string }) {
+function StatusIcon({ status, barClass }: { status: LeadStatusKey; barClass?: string }) {
   switch (status) {
     case "Qualified":
       return <Check className="h-3 w-3 campaign-status-pulse" strokeWidth={2.75} />;
@@ -96,7 +102,7 @@ function StatusChip({
   label: string;
   hint: string;
   chipClass: string;
-  status: StatusKey;
+  status: LeadStatusKey;
   barClass?: string;
 }) {
   return (
@@ -124,8 +130,16 @@ export function leadStatusAccent(status: string) {
   return "border-l-slate-300";
 }
 
+export const LEAD_STATUS_OPTIONS: LeadStatusKey[] = [
+  "Qualified",
+  "Callback",
+  "In progress",
+  "No answer",
+  "Not called",
+];
+
 export function LeadStatusIndicator({ status }: { status: string }) {
-  const key = status in STATUS_META ? (status as StatusKey) : null;
+  const key = status in STATUS_META ? (status as LeadStatusKey) : null;
   const meta = key
     ? STATUS_META[key]
     : {
@@ -158,5 +172,51 @@ export function LeadStatusIndicator({ status }: { status: string }) {
         <span className="truncate">{meta.label}</span>
       </span>
     </StatusTooltip>
+  );
+}
+
+export function LeadStatusPicker({
+  status,
+  onChange,
+}: {
+  status: string;
+  onChange: (status: LeadStatusKey) => void;
+}) {
+  const current = status in STATUS_META ? (status as LeadStatusKey) : null;
+
+  return (
+    <CustomDropdown
+      align="left"
+      menuWidth={172}
+      trigger={
+        <span className="inline-flex cursor-pointer rounded-[5px] transition-opacity hover:opacity-85 focus-visible:outline-none">
+          <LeadStatusIndicator status={status} />
+        </span>
+      }
+    >
+      {LEAD_STATUS_OPTIONS.map((key) => {
+        const meta = STATUS_META[key];
+        const isActive = current === key;
+
+        return (
+          <DropdownItem key={key} onClick={() => onChange(key)}>
+            <span className="flex w-full items-center gap-2">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-[5px] border px-1.5 py-0.5 text-[11px] font-semibold leading-none",
+                  meta.chip,
+                )}
+              >
+                <span className="flex h-3 w-3 shrink-0 items-center justify-center">
+                  <StatusIcon status={key} barClass={meta.bar} />
+                </span>
+                {meta.label}
+              </span>
+              {isActive ? <Check className="ml-auto h-3.5 w-3.5 shrink-0 text-emerald-600" /> : null}
+            </span>
+          </DropdownItem>
+        );
+      })}
+    </CustomDropdown>
   );
 }

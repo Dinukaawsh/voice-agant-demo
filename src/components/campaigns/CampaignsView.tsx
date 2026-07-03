@@ -449,7 +449,21 @@ export function CampaignsView() {
                       ) : c.status === "Paused" ? (
                         <MetricIconButton icon={Play} tone="emerald" label="Resume campaign" />
                       ) : null}
-                      <MetricIconButton icon={MoreHorizontal} tone="slate" label="More options" />
+                      <div className="group/tip relative inline-flex">
+                        <button
+                          type="button"
+                          aria-label="More options"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center text-slate-500 transition-opacity hover:opacity-70"
+                        >
+                          <MoreHorizontal className="h-4 w-4" strokeWidth={2.25} />
+                        </button>
+                        <span
+                          role="tooltip"
+                          className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100"
+                        >
+                          More options
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ComponentProps } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   CircleDot,
   Download,
   Filter,
   Megaphone,
   MoreHorizontal,
+  PhoneCall,
   PhoneMissed,
   Plus,
   Target,
@@ -23,25 +25,62 @@ import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 import { CustomCheckbox } from "@/components/ui/CustomCheckbox";
 import { Pagination } from "@/components/ui/Pagination";
 import { CustomSelect } from "@/components/ui/CustomSelect";
-import { MetricIconButton } from "@/components/ui/MetricIconBox";
 import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
 import { BulkSelectionActionBar } from "@/components/ui/BulkSelectionActionBar";
-import { LeadStatusIndicator, leadStatusAccent } from "@/components/leads/LeadStatusIndicator";
+import {
+  LeadStatusPicker,
+  leadStatusAccent,
+  type LeadStatusKey,
+} from "@/components/leads/LeadStatusIndicator";
 import { cn } from "@/lib/cn";
 
 const TOTAL_LEADS = 6950;
+
+const LEAD_ROW_GRID =
+  "lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_minmax(118px,auto)_minmax(100px,0.9fr)_64px_minmax(80px,auto)]";
+
+function LeadTableIconAction({
+  icon: Icon,
+  label,
+  onClick,
+  iconClassName,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onClick?: ComponentProps<"button">["onClick"];
+  iconClassName?: string;
+}) {
+  return (
+    <div className="group/tip relative inline-flex">
+      <button
+        type="button"
+        aria-label={label}
+        onClick={onClick}
+        className="flex h-8 w-8 shrink-0 items-center justify-center transition-opacity hover:opacity-70"
+      >
+        <Icon className={cn("h-4 w-4", iconClassName)} strokeWidth={2.25} />
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100"
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
 
 type LeadRow = {
   id: string;
   name: string;
   phone: string;
   list: string;
-  status: string;
+  status: LeadStatusKey;
   lastCall: string;
   attempts: number;
 };
 
-const LEADS: LeadRow[] = [
+const INITIAL_LEADS: LeadRow[] = [
   {
     id: "1",
     name: "Marie Dupont",
@@ -147,6 +186,7 @@ function formatLeadPhone(phone: string) {
 }
 
 export function LeadsView() {
+  const [leads, setLeads] = useState<LeadRow[]>(INITIAL_LEADS);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectAllFiltered, setSelectAllFiltered] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -157,9 +197,9 @@ export function LeadsView() {
   const pageSize = 6;
 
   const listOptions = useMemo(() => {
-    const lists = [...new Set(LEADS.map((l) => l.list))];
+    const lists = [...new Set(leads.map((l) => l.list))];
     return [{ value: "all", label: "All lists" }, ...lists.map((l) => ({ value: l, label: l }))];
-  }, []);
+  }, [leads]);
 
   const metrics = useMemo(
     () => ({
@@ -179,7 +219,7 @@ export function LeadsView() {
   ].filter(Boolean).length;
 
   const filteredLeads = useMemo(() => {
-    let list = LEADS.filter((l) => {
+    let list = leads.filter((l) => {
       if (statusFilter !== "all" && l.status !== statusFilter) return false;
       if (listFilter !== "all" && l.list !== listFilter) return false;
       return true;
@@ -192,7 +232,7 @@ export function LeadsView() {
     });
 
     return list;
-  }, [statusFilter, listFilter, sortBy]);
+  }, [leads, statusFilter, listFilter, sortBy]);
 
   const pageIds = useMemo(() => filteredLeads.map((l) => l.id), [filteredLeads]);
   const totalPages = Math.max(1, Math.ceil(TOTAL_LEADS / pageSize));
@@ -237,6 +277,35 @@ export function LeadsView() {
     setStatusFilter("all");
     setListFilter("all");
     setSortBy("newest");
+  }
+
+  function updateLeadStatus(id: string, status: LeadStatusKey) {
+    setLeads((prev) => prev.map((lead) => (lead.id === id ? { ...lead, status } : lead)));
+  }
+
+  function deleteLead(id: string) {
+    setLeads((prev) => prev.filter((lead) => lead.id !== id));
+    setSelectedIds((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }
+
+  function callLead(id: string) {
+    setLeads((prev) =>
+      prev.map((lead) =>
+        lead.id === id
+          ? {
+              ...lead,
+              status: "In progress",
+              lastCall: "Just now",
+              attempts: lead.attempts + 1,
+            }
+          : lead,
+      ),
+    );
   }
 
   const statCards = [
@@ -386,7 +455,7 @@ export function LeadsView() {
         </p>
 
         <Card className="overflow-hidden p-0">
-          <div className="hidden border-b border-border bg-gradient-to-r from-cyan-50/50 via-white to-violet-50/30 px-5 py-3 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_minmax(118px,auto)_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
+          <div className={cn("hidden border-b border-border bg-gradient-to-r from-cyan-50/50 via-white to-violet-50/30 px-5 py-3 lg:grid lg:items-center lg:gap-3", LEAD_ROW_GRID)}>
             <span className="flex justify-center">
               <CustomCheckbox
                 checked={allPageSelected || selectAllFiltered}
@@ -401,7 +470,7 @@ export function LeadsView() {
             <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Status</span>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Last call</span>
             <span className="text-right text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Tries</span>
-            <span />
+            <span className="text-right text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Actions</span>
           </div>
 
           <div className="divide-y divide-border/60">
@@ -420,7 +489,7 @@ export function LeadsView() {
                       : "hover:bg-gradient-to-r hover:from-cyan-50/30 hover:to-transparent",
                   )}
                 >
-                  <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_minmax(118px,auto)_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
+                  <div className={cn("flex flex-col gap-4 lg:grid lg:items-center lg:gap-3", LEAD_ROW_GRID)}>
                     <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <CustomCheckbox
                         checked={isSelected}
@@ -458,9 +527,12 @@ export function LeadsView() {
                       {lead.list}
                     </p>
 
-                    <div>
+                    <div onClick={(e) => e.stopPropagation()}>
                       <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">Status · </span>
-                      <LeadStatusIndicator status={lead.status} />
+                      <LeadStatusPicker
+                        status={lead.status}
+                        onChange={(status) => updateLeadStatus(lead.id, status)}
+                      />
                     </div>
 
                     <p className="text-[13px] text-ink-muted">
@@ -482,18 +554,43 @@ export function LeadsView() {
                       </span>
                     </p>
 
-                    <div className="flex justify-end lg:opacity-70 lg:transition-opacity lg:group-hover:opacity-100">
+                    <div
+                      className="flex items-center justify-end gap-0.5 lg:opacity-80 lg:transition-opacity lg:group-hover:opacity-100"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <LeadTableIconAction
+                        icon={PhoneCall}
+                        label="Call now"
+                        iconClassName="text-emerald-600"
+                        onClick={() => callLead(lead.id)}
+                      />
+                      <LeadTableIconAction
+                        icon={Trash2}
+                        label="Delete lead"
+                        iconClassName="text-red-500"
+                        onClick={() => deleteLead(lead.id)}
+                      />
                       <CustomDropdown
                         align="right"
                         menuWidth={180}
                         trigger={
-                          <MetricIconButton icon={MoreHorizontal} tone="slate" label="More options" />
+                          <div className="group/tip relative inline-flex">
+                            <span
+                              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center text-slate-500 transition-opacity hover:opacity-70"
+                              aria-label="More options"
+                            >
+                              <MoreHorizontal className="h-4 w-4" strokeWidth={2.25} />
+                            </span>
+                            <span
+                              role="tooltip"
+                              className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100"
+                            >
+                              More options
+                            </span>
+                          </div>
                         }
                       >
                         <DropdownItem>View details</DropdownItem>
-                        <DropdownItem>Call now</DropdownItem>
-                        <DropdownItem>Change status</DropdownItem>
-                        <DropdownItem danger>Delete</DropdownItem>
                       </CustomDropdown>
                     </div>
                   </div>
