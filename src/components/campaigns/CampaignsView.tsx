@@ -13,8 +13,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
   CampaignCreationModal,
-  type NewCampaign,
 } from "@/components/campaigns/CampaignCreationModal";
+import type { NewCampaign } from "./CampaignCreationWizard";
 
 type CampaignRow = {
   id: string;
@@ -91,7 +91,7 @@ export function CampaignsView() {
           <p className="text-[14px] text-ink-muted">
             2 running · 1 paused · 1 draft
           </p>
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button color="brand" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             New campaign
           </Button>
