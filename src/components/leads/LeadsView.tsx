@@ -6,6 +6,7 @@ import {
   CircleDot,
   Download,
   Filter,
+  Layers,
   Megaphone,
   MoreHorizontal,
   PhoneCall,
@@ -15,6 +16,7 @@ import {
   Trash2,
   TrendingUp,
   Upload,
+  UploadCloud,
   User,
   Users,
   X,
@@ -32,9 +34,49 @@ import {
   leadStatusAccent,
   type LeadStatusKey,
 } from "@/components/leads/LeadStatusIndicator";
+import {
+  ImportLeadsModal,
+  type NewLeadList,
+} from "@/components/leads/ImportLeadsModal";
 import { cn } from "@/lib/cn";
 
 const TOTAL_LEADS = 6950;
+
+type LeadList = {
+  name: string;
+  total: number;
+  qualified: number;
+  noAnswer: number;
+  notCalled: number;
+  uploaded: string;
+};
+
+const LEAD_LISTS: LeadList[] = [
+  {
+    name: "Health FR - July",
+    total: 4200,
+    qualified: 312,
+    noAnswer: 980,
+    notCalled: 2908,
+    uploaded: "Jul 1, 2026",
+  },
+  {
+    name: "Solar EN - Q3",
+    total: 2800,
+    qualified: 89,
+    noAnswer: 620,
+    notCalled: 2091,
+    uploaded: "Jun 24, 2026",
+  },
+  {
+    name: "Insurance ES",
+    total: 950,
+    qualified: 24,
+    noAnswer: 210,
+    notCalled: 716,
+    uploaded: "Jun 28, 2026",
+  },
+];
 
 const LEAD_ROW_GRID =
   "lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_minmax(118px,auto)_minmax(100px,0.9fr)_64px_minmax(80px,auto)]";
@@ -185,8 +227,91 @@ function formatLeadPhone(phone: string) {
   };
 }
 
+function LeadListStat({
+  label,
+  value,
+  dotClass,
+  valueClass,
+}: {
+  label: string;
+  value: number;
+  dotClass: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-ink-hint">
+        <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dotClass)} />
+        <span className="truncate">{label}</span>
+      </p>
+      <p className={cn("mt-0.5 text-[13px] font-semibold tabular-nums text-ink", valueClass)}>
+        {value.toLocaleString()}
+      </p>
+    </div>
+  );
+}
+
+function LeadListCard({
+  list,
+  selected,
+  onSelect,
+}: {
+  list: LeadList;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const q = list.total > 0 ? (list.qualified / list.total) * 100 : 0;
+  const na = list.total > 0 ? (list.noAnswer / list.total) * 100 : 0;
+  const nc = list.total > 0 ? (list.notCalled / list.total) * 100 : 0;
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        "group flex flex-col rounded-2xl border bg-white p-4 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card",
+        selected
+          ? "border-[#3c0382] ring-1 ring-[#3c0382]/20"
+          : "border-border hover:border-[#3c0382]/30",
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-sm">
+          <Layers className="h-4 w-4" strokeWidth={2.25} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[14px] font-semibold text-ink">{list.name}</p>
+          <p className="truncate text-[11.5px] text-ink-hint">Uploaded {list.uploaded}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[17px] font-bold tabular-nums leading-none text-ink">
+            {list.total.toLocaleString()}
+          </p>
+          <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-ink-hint">
+            leads
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3.5 flex h-2 overflow-hidden rounded-full bg-surface-muted">
+        <div className="h-full bg-emerald-500" style={{ width: `${q}%` }} />
+        <div className="h-full bg-amber-500" style={{ width: `${na}%` }} />
+        <div className="h-full bg-slate-300" style={{ width: `${nc}%` }} />
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <LeadListStat label="Qualified" value={list.qualified} dotClass="bg-emerald-500" valueClass="text-emerald-600" />
+        <LeadListStat label="No answer" value={list.noAnswer} dotClass="bg-amber-500" valueClass="text-amber-600" />
+        <LeadListStat label="Not called" value={list.notCalled} dotClass="bg-slate-300" />
+      </div>
+    </button>
+  );
+}
+
 export function LeadsView() {
   const [leads, setLeads] = useState<LeadRow[]>(INITIAL_LEADS);
+  const [leadLists, setLeadLists] = useState<LeadList[]>(LEAD_LISTS);
+  const [importOpen, setImportOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectAllFiltered, setSelectAllFiltered] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -197,9 +322,27 @@ export function LeadsView() {
   const pageSize = 6;
 
   const listOptions = useMemo(() => {
-    const lists = [...new Set(leads.map((l) => l.list))];
+    const lists = [...new Set(leadLists.map((l) => l.name))];
     return [{ value: "all", label: "All lists" }, ...lists.map((l) => ({ value: l, label: l }))];
-  }, [leads]);
+  }, [leadLists]);
+
+  function handleImportList(list: NewLeadList) {
+    setLeadLists((prev) => [
+      {
+        name: list.name,
+        total: list.total,
+        qualified: 0,
+        noAnswer: 0,
+        notCalled: list.total,
+        uploaded: "Just now",
+      },
+      ...prev,
+    ]);
+  }
+
+  function toggleListFilter(name: string) {
+    setListFilter((prev) => (prev === name ? "all" : name));
+  }
 
   const metrics = useMemo(
     () => ({
@@ -392,6 +535,49 @@ export function LeadsView() {
           ))}
         </MetricStatGrid>
 
+        {/* Lead lists */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-cyan-600" />
+              <h3 className="text-[15px] font-semibold text-ink">Lead lists</h3>
+              <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-semibold text-ink-muted">
+                {leadLists.length}
+              </span>
+            </div>
+            {listFilter !== "all" && (
+              <button
+                type="button"
+                onClick={() => setListFilter("all")}
+                className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#3c0382] hover:underline"
+              >
+                <X className="h-3.5 w-3.5" />
+                Clear list filter
+              </button>
+            )}
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {leadLists.map((list) => (
+              <LeadListCard
+                key={list.name}
+                list={list}
+                selected={listFilter === list.name}
+                onSelect={() => toggleListFilter(list.name)}
+              />
+            ))}
+            <button
+              type="button"
+              onClick={() => setImportOpen(true)}
+              className="flex min-h-[132px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-cyan-300/80 bg-cyan-50/40 p-4 text-center transition-colors hover:border-cyan-500 hover:bg-cyan-50"
+            >
+              <UploadCloud className="h-7 w-7 text-cyan-600" />
+              <span className="text-[13px] font-semibold text-ink">Upload a new list</span>
+              <span className="text-[12px] text-ink-hint">Import leads from a CSV</span>
+            </button>
+          </div>
+        </div>
+
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-end gap-2">
             <div
@@ -423,7 +609,7 @@ export function LeadsView() {
               )}
             </button>
 
-            <Button variant="secondary">
+            <Button variant="secondary" onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4" />
               Import
             </Button>
@@ -674,6 +860,12 @@ export function LeadsView() {
             </div>
           ) : null
         }
+      />
+
+      <ImportLeadsModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={handleImportList}
       />
     </>
   );

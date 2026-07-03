@@ -4,6 +4,11 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
 
+/**
+ * Centered dialog used for the creation flows (agent / campaign / employee).
+ * Historically this slid in from the right; it now opens centered on screen.
+ * The prop API is unchanged so existing callers keep working.
+ */
 export function SlidePanel({
   open,
   onClose,
@@ -40,10 +45,10 @@ export function SlidePanel({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <button
         type="button"
-        className="absolute inset-0 bg-slate-900/25 backdrop-blur-[2px] transition-opacity"
+        className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px] transition-opacity"
         aria-label="Close panel"
         onClick={onClose}
       />
@@ -53,10 +58,8 @@ export function SlidePanel({
         aria-modal="true"
         aria-labelledby="slide-panel-title"
         className={cn(
-          "slide-panel-enter absolute inset-y-3 right-3 flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-modal sm:inset-y-4 sm:right-4",
-          size === "wide"
-            ? "w-[min(100%,680px)] sm:w-[min(100%,760px)] lg:w-[800px] xl:w-[840px]"
-            : "w-[min(100%,560px)] sm:w-[min(100%,600px)] lg:w-[640px]",
+          "animate-modal-in relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-modal",
+          size === "wide" ? "max-w-4xl" : "max-w-2xl",
           className,
         )}
       >

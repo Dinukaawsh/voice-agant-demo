@@ -21,7 +21,7 @@ export function AgentCreationModal({
       open={open}
       onClose={onClose}
       title="Create voice agent"
-      subtitle="Build your agent step by step — upload recordings in call order."
+      subtitle="Build your agent step by step. Upload recordings in call order."
       size="wide"
       headerExtra={
         <div className="border-t border-blue-100/80 bg-gradient-to-r from-blue-50 via-indigo-50/80 to-violet-50 px-5 py-2.5 sm:px-6">
