@@ -4,6 +4,7 @@ import {
   Bot,
   Megaphone,
   Users,
+  Headset,
   ClipboardCheck,
   CreditCard,
   UserCog,
@@ -47,6 +48,15 @@ export const NAV_ITEMS: NavItem[] = [
     iconIdle:
       "border-orange-500 bg-white text-orange-600 group-hover/item:bg-orange-500 group-hover/item:text-white",
     iconActive: "border-orange-500 bg-orange-500 text-white",
+  },
+  {
+    label: "Employees",
+    href: "/employees",
+    icon: Headset,
+    description: "Calling staff who work your campaigns",
+    iconIdle:
+      "border-pink-500 bg-white text-pink-600 group-hover/item:bg-pink-500 group-hover/item:text-white",
+    iconActive: "border-pink-500 bg-pink-500 text-white",
   },
   {
     label: "Leads",

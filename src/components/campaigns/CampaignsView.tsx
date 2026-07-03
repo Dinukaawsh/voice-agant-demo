@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 import {
   Filter,
+  Headset,
   Megaphone,
   MoreHorizontal,
   Pause,
-  PhoneCall,
   Play,
   Plus,
   Target,
@@ -34,6 +34,7 @@ type CampaignRow = {
   answered: number;
   qualified: number;
   schedule: string;
+  employees: number;
 };
 
 const INITIAL_CAMPAIGNS: CampaignRow[] = [
@@ -46,7 +47,8 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     dialed: 908,
     answered: 201,
     qualified: 5,
-    schedule: "Mon–Fri, 9am–6pm CET",
+    schedule: "8 employees on shift",
+    employees: 8,
   },
   {
     id: "solar-en-q3-push",
@@ -57,7 +59,8 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     dialed: 580,
     answered: 142,
     qualified: 89,
-    schedule: "Mon–Sat, 10am–5pm GMT",
+    schedule: "6 employees on shift",
+    employees: 6,
   },
   {
     id: "insurance-es-pilot",
@@ -69,17 +72,19 @@ const INITIAL_CAMPAIGNS: CampaignRow[] = [
     answered: 48,
     qualified: 24,
     schedule: "Paused by admin",
+    employees: 2,
   },
   {
     id: "mutuelle-fr-august",
     name: "Mutuelle FR - August",
     agent: "Mutuelle comparison FR",
     status: "Draft",
-    leads: 0,
+    leads: 10000,
     dialed: 0,
     answered: 0,
     qualified: 0,
-    schedule: "Not scheduled",
+    schedule: "Add employees to start",
+    employees: 0,
   },
 ];
 
@@ -110,7 +115,7 @@ function progressGradient(status: string) {
 }
 
 const CAMPAIGN_ROW_GRID =
-  "lg:grid-cols-[minmax(200px,1.25fr)_84px_minmax(120px,0.8fr)_minmax(300px,1.6fr)_72px]";
+  "lg:grid-cols-[minmax(180px,1.1fr)_84px_minmax(110px,0.7fr)_minmax(360px,2.1fr)_72px]";
 
 function formatCampaignRate(value: number) {
   return `${value.toFixed(2)}%`;
@@ -119,7 +124,7 @@ function formatCampaignRate(value: number) {
 function campaignDetailStats(campaign: CampaignRow) {
   const notAnswered = Math.max(campaign.dialed - campaign.answered, 0);
   const answerRate = campaign.dialed > 0 ? (campaign.answered / campaign.dialed) * 100 : 0;
-  const convRate = campaign.dialed > 0 ? (campaign.qualified / campaign.dialed) * 100 : 0;
+  const convRate = campaign.answered > 0 ? (campaign.qualified / campaign.answered) * 100 : 0;
 
   return { notAnswered, answerRate, convRate };
 }
@@ -148,38 +153,29 @@ export function CampaignsView() {
   const [campaigns, setCampaigns] = useState<CampaignRow[]>(INITIAL_CAMPAIGNS);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [agentFilter, setAgentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
-
-  const agentOptions = useMemo(() => {
-    const agents = [...new Set(campaigns.map((c) => c.agent))];
-    return [
-      { value: "all", label: "All agents" },
-      ...agents.map((a) => ({ value: a, label: a })),
-    ];
-  }, [campaigns]);
 
   const metrics = useMemo(() => {
     const running = campaigns.filter((c) => c.status === "Running").length;
     const totalLeads = campaigns.reduce((s, c) => s + c.leads, 0);
     const totalDialed = campaigns.reduce((s, c) => s + c.dialed, 0);
     const totalQualified = campaigns.reduce((s, c) => s + c.qualified, 0);
+    const totalEmployees = campaigns.reduce((s, c) => s + c.employees, 0);
+    const totalAnswered = campaigns.reduce((s, c) => s + c.answered, 0);
     const convRate =
-      totalDialed > 0 ? Math.round((totalQualified / totalDialed) * 100) : 0;
+      totalAnswered > 0 ? Math.round((totalQualified / totalAnswered) * 100) : 0;
 
-    return { running, totalLeads, totalDialed, totalQualified, convRate };
+    return { running, totalLeads, totalDialed, totalQualified, totalEmployees, convRate };
   }, [campaigns]);
 
   const activeFilterCount = [
     statusFilter !== "all",
-    agentFilter !== "all",
     sortBy !== "newest",
   ].filter(Boolean).length;
 
   const filteredCampaigns = useMemo(() => {
     let list = campaigns.filter((c) => {
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
-      if (agentFilter !== "all" && c.agent !== agentFilter) return false;
       return true;
     });
 
@@ -195,11 +191,10 @@ export function CampaignsView() {
     });
 
     return list;
-  }, [campaigns, statusFilter, agentFilter, sortBy]);
+  }, [campaigns, statusFilter, sortBy]);
 
   function clearFilters() {
     setStatusFilter("all");
-    setAgentFilter("all");
     setSortBy("newest");
   }
 
@@ -227,16 +222,16 @@ export function CampaignsView() {
       ring: "ring-blue-500/20",
     },
     {
-      label: "Calls placed",
-      value: metrics.totalDialed.toLocaleString(),
-      sub: "Outbound dials",
-      icon: PhoneCall,
-      tone: "violet" as const,
-      glow: "bg-violet-500/10",
-      ring: "ring-violet-500/20",
+      label: "Employees working",
+      value: metrics.totalEmployees.toLocaleString(),
+      sub: "Across all campaigns",
+      icon: Headset,
+      tone: "rose" as const,
+      glow: "bg-rose-500/10",
+      ring: "ring-rose-500/20",
     },
     {
-      label: "Qualified",
+      label: "Eligible leads",
       value: metrics.totalQualified.toLocaleString(),
       sub: `${metrics.convRate}% conversion`,
       icon: Target,
@@ -290,13 +285,6 @@ export function CampaignsView() {
                   options={STATUS_OPTIONS}
                   size="sm"
                   className="w-[130px]"
-                />
-                <CustomSelect
-                  value={agentFilter}
-                  onChange={setAgentFilter}
-                  options={agentOptions}
-                  size="sm"
-                  className="w-[200px]"
                 />
                 <CustomSelect
                   value={sortBy}
@@ -355,12 +343,6 @@ export function CampaignsView() {
               value={statusFilter}
               onChange={setStatusFilter}
               options={STATUS_OPTIONS}
-              size="sm"
-            />
-            <CustomSelect
-              value={agentFilter}
-              onChange={setAgentFilter}
-              options={agentOptions}
               size="sm"
             />
             <CustomSelect
@@ -438,7 +420,7 @@ export function CampaignsView() {
                       <div className="mb-1.5 flex items-center justify-between text-[11px]">
                         <span className="font-medium text-ink-muted">
                           <span className="lg:hidden">Progress · </span>
-                          {c.leads > 0 ? `${progress}%` : "—"}
+                          {c.leads > 0 ? `${progress}%` : "-"}
                         </span>
                         {c.dialed > 0 && (
                           <span className="text-ink-hint">{c.leads.toLocaleString()} leads</span>
@@ -460,30 +442,40 @@ export function CampaignsView() {
                       <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">
                         Campaign details
                       </span>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-3 rounded-xl border border-border/70 bg-surface-subtle/60 px-3 py-2.5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-2 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0">
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-3 rounded-xl border border-border/70 bg-surface-subtle/60 px-3 py-2.5 sm:grid-cols-4 lg:grid-cols-7 lg:gap-2 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0">
+                        <CampaignDetailMetric
+                          label="Employees"
+                          value={c.employees > 0 ? String(c.employees) : "-"}
+                          valueClassName="text-pink-600"
+                        />
                         <CampaignDetailMetric
                           label="Dialed"
-                          value={c.dialed > 0 ? c.dialed.toLocaleString() : "—"}
+                          value={c.dialed > 0 ? c.dialed.toLocaleString() : "-"}
                         />
                         <CampaignDetailMetric
                           label="Answered"
-                          value={c.dialed > 0 ? c.answered.toLocaleString() : "—"}
+                          value={c.dialed > 0 ? c.answered.toLocaleString() : "-"}
                           valueClassName="text-emerald-600"
                         />
                         <CampaignDetailMetric
                           label="Not Answered"
-                          value={c.dialed > 0 ? notAnswered.toLocaleString() : "—"}
+                          value={c.dialed > 0 ? notAnswered.toLocaleString() : "-"}
                           valueClassName="text-rose-600"
                         />
                         <CampaignDetailMetric
                           label="Answer Rate"
-                          value={c.dialed > 0 ? formatCampaignRate(answerRate) : "—"}
+                          value={c.dialed > 0 ? formatCampaignRate(answerRate) : "-"}
                           valueClassName="text-blue-600"
                         />
                         <CampaignDetailMetric
                           label="Conv. Rate"
-                          value={c.dialed > 0 ? formatCampaignRate(convRate) : "—"}
+                          value={c.dialed > 0 ? formatCampaignRate(convRate) : "-"}
                           valueClassName="text-violet-600"
+                        />
+                        <CampaignDetailMetric
+                          label="Eligible"
+                          value={c.dialed > 0 ? c.qualified.toLocaleString() : "-"}
+                          valueClassName="text-pink-600"
                         />
                       </div>
                     </div>

@@ -6,6 +6,7 @@ import {
   Bot,
   ChevronRight,
   Clock,
+  Headset,
   Megaphone,
   PhoneCall,
   Sparkles,
@@ -52,15 +53,15 @@ const STATS = [
     ring: "ring-violet-500/20",
   },
   {
-    label: "Live agents",
-    value: "2",
-    change: "4 total",
-    sub: "2 in testing",
+    label: "Employees working",
+    value: "14",
+    change: "of 20",
+    sub: "on shift now",
     trend: "neutral" as const,
-    icon: Bot,
-    tone: "orange" as const,
-    glow: "bg-orange-500/10",
-    ring: "ring-orange-500/20",
+    icon: Headset,
+    tone: "rose" as const,
+    glow: "bg-rose-500/10",
+    ring: "ring-rose-500/20",
   },
 ];
 
@@ -140,7 +141,7 @@ const RECENT_CALLS = [
     lead: "Jean Martin",
     agent: "Health FR - July",
     status: "No answer",
-    duration: "—",
+    duration: "-",
     time: "28 min ago",
     initials: "JM",
     avatarBg: "from-slate-400 to-slate-600",
@@ -205,7 +206,7 @@ export function DashboardView() {
                 <span className="dashboard-live-dot absolute inline-flex h-full w-full rounded-full bg-emerald-400" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              Platform live · 2 agents on calls
+              Platform live · 14 employees on calls
             </div>
             <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Good morning, Admin
