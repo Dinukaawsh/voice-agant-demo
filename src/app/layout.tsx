@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Twist Voice - Demo Mockup",
-  description: "Beautiful UI mockup for AI Voice Agent platform demo",
+  title: "Twist Voice",
+  description: "AI Voice Agent platform",
 };
 
 export default function RootLayout({

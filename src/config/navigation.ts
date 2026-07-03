@@ -98,5 +98,5 @@ export function getPageMeta(pathname: string): {
       description: "Guided step-by-step agent setup",
     };
   }
-  return { title: "Voice Agent Platform", description: "Demo mockup" };
+  return { title: "Voice Agent Platform", description: "AI Voice Agent platform" };
 }

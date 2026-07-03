@@ -201,7 +201,7 @@ export function DashboardView() {
               Platform live · 2 agents on calls
             </div>
             <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Good morning, Demo Admin
+              Good morning, Admin
             </h2>
             <p className="mt-2 max-w-lg text-[14px] leading-relaxed text-ink-muted">
               Your voice agents placed{" "}

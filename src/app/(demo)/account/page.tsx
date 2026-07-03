@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 
 const PROFILE = {
-  name: "Demo Admin",
+  name: "Admin",
   role: "Organization owner",
   email: "admin@twist-digital.com",
   phone: "+33 145 678 901",
@@ -44,7 +44,7 @@ const PLAN = {
 };
 
 const TEAM = [
-  { name: "Demo Admin", email: "admin@twist-digital.com", role: "Owner", status: "Active" },
+  { name: "Admin", email: "admin@twist-digital.com", role: "Owner", status: "Active" },
   { name: "Camille Fournier", email: "camille@twist-digital.com", role: "Manager", status: "Active" },
   { name: "Lucas Girard", email: "lucas@twist-digital.com", role: "Agent", status: "Active" },
   { name: "Emma Rousseau", email: "emma@twist-digital.com", role: "Agent", status: "Invited" },

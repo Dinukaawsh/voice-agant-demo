@@ -55,7 +55,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           </div>
           <div className="hidden text-left sm:block">
             <p className="text-[13px] font-medium leading-tight text-ink">
-              Demo Admin
+              Admin
             </p>
             <p className="text-[11px] text-ink-hint">Twist Digital</p>
           </div>
