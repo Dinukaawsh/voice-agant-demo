@@ -192,7 +192,7 @@ export function AgentsView() {
               <DropdownItem onClick={() => setFilter("all")}>All agents</DropdownItem>
             </CustomDropdown>
           </div>
-          <Button color="violet" onClick={() => setCreateOpen(true)}>
+          <Button color="brand" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             Create agent
           </Button>

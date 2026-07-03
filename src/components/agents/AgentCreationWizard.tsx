@@ -11,11 +11,16 @@ import {
   ListOrdered,
   Mic2,
   Play,
+  Plus,
   ShieldCheck,
   Shuffle,
   SlidersHorizontal,
   Sparkles,
   Upload,
+  Building2,
+  Coffee,
+  Headphones,
+  VolumeX,
   Volume2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
@@ -32,6 +37,58 @@ const STEPS = [
   { id: 6, label: "Edge cases", desc: "Objections & exits", icon: GitBranch },
   { id: 7, label: "Variations", desc: "Natural variety", icon: Shuffle },
   { id: 8, label: "Settings", desc: "Ambience & context", icon: SlidersHorizontal },
+] as const;
+
+/** Per-step icon colours — idle: white bg + coloured border/icon; active: filled + white icon */
+const STEP_ICON_STYLES = [
+  {
+    idle: "border-violet-500 text-violet-600",
+    active: "border-violet-500 bg-violet-500 text-white",
+    hover: "group-hover/step:border-violet-500 group-hover/step:bg-violet-500 group-hover/step:text-white",
+    label: "text-violet-600",
+  },
+  {
+    idle: "border-blue-500 text-blue-600",
+    active: "border-blue-500 bg-blue-500 text-white",
+    hover: "group-hover/step:border-blue-500 group-hover/step:bg-blue-500 group-hover/step:text-white",
+    label: "text-blue-600",
+  },
+  {
+    idle: "border-cyan-500 text-cyan-600",
+    active: "border-cyan-500 bg-cyan-500 text-white",
+    hover: "group-hover/step:border-cyan-500 group-hover/step:bg-cyan-500 group-hover/step:text-white",
+    label: "text-cyan-600",
+  },
+  {
+    idle: "border-emerald-500 text-emerald-600",
+    active: "border-emerald-500 bg-emerald-500 text-white",
+    hover: "group-hover/step:border-emerald-500 group-hover/step:bg-emerald-500 group-hover/step:text-white",
+    label: "text-emerald-600",
+  },
+  {
+    idle: "border-amber-500 text-amber-600",
+    active: "border-amber-500 bg-amber-500 text-white",
+    hover: "group-hover/step:border-amber-500 group-hover/step:bg-amber-500 group-hover/step:text-white",
+    label: "text-amber-600",
+  },
+  {
+    idle: "border-orange-500 text-orange-600",
+    active: "border-orange-500 bg-orange-500 text-white",
+    hover: "group-hover/step:border-orange-500 group-hover/step:bg-orange-500 group-hover/step:text-white",
+    label: "text-orange-600",
+  },
+  {
+    idle: "border-fuchsia-500 text-fuchsia-600",
+    active: "border-fuchsia-500 bg-fuchsia-500 text-white",
+    hover: "group-hover/step:border-fuchsia-500 group-hover/step:bg-fuchsia-500 group-hover/step:text-white",
+    label: "text-fuchsia-600",
+  },
+  {
+    idle: "border-indigo-500 text-indigo-600",
+    active: "border-indigo-500 bg-indigo-500 text-white",
+    hover: "group-hover/step:border-indigo-500 group-hover/step:bg-indigo-500 group-hover/step:text-white",
+    label: "text-indigo-600",
+  },
 ] as const;
 
 const LANGUAGE_OPTIONS = [
@@ -202,6 +259,179 @@ function PillGroup({
   );
 }
 
+const AMBIENCE_OPTIONS = [
+  {
+    value: "None",
+    label: "None",
+    desc: "Agent voice only",
+    icon: VolumeX,
+    card: "from-slate-50 to-white",
+    iconIdle: "border-slate-300 text-slate-500",
+    iconActive: "border-[#3c0382] bg-[#3c0382] text-white",
+  },
+  {
+    value: "Office ambience",
+    label: "Office",
+    desc: "Soft workplace hum",
+    icon: Building2,
+    card: "from-blue-50/80 to-white",
+    iconIdle: "border-blue-400 text-blue-600",
+    iconActive: "border-[#3c0382] bg-[#3c0382] text-white",
+  },
+  {
+    value: "Café ambience",
+    label: "Café",
+    desc: "Warm background chatter",
+    icon: Coffee,
+    card: "from-amber-50/80 to-white",
+    iconIdle: "border-amber-400 text-amber-600",
+    iconActive: "border-[#3c0382] bg-[#3c0382] text-white",
+  },
+  {
+    value: "Call centre",
+    label: "Call centre",
+    desc: "Professional floor tone",
+    icon: Headphones,
+    card: "from-indigo-50/80 to-white",
+    iconIdle: "border-indigo-400 text-indigo-600",
+    iconActive: "border-[#3c0382] bg-[#3c0382] text-white",
+  },
+] as const;
+
+function AmbiencePicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2.5">
+      {AMBIENCE_OPTIONS.map((opt) => {
+        const selected = value === opt.value;
+        const Icon = opt.icon;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              "group relative flex flex-col items-start gap-3 rounded-2xl border-2 bg-gradient-to-br p-3.5 text-left transition-all",
+              opt.card,
+              selected
+                ? "border-[#3c0382] shadow-md shadow-[#3c0382]/15 ring-2 ring-[#3c0382]/10"
+                : "border-border hover:border-[#3c0382]/40 hover:shadow-soft",
+            )}
+          >
+            <span
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-xl border-2 transition-colors duration-200 [&_svg]:shrink-0",
+                selected ? opt.iconActive : cn("bg-white", opt.iconIdle),
+              )}
+            >
+              <Icon className="h-[18px] w-[18px]" strokeWidth={2.25} />
+            </span>
+            <span>
+              <span className="block text-[13px] font-semibold text-ink">{opt.label}</span>
+              <span className="mt-0.5 block text-[11px] text-ink-muted">{opt.desc}</span>
+            </span>
+            {selected && (
+              <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#3c0382] text-white">
+                <Check className="h-3 w-3" strokeWidth={3} />
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function VolumeControl({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  const level =
+    value === 0 ? "Muted" : value < 35 ? "Low" : value < 70 ? "Medium" : "High";
+
+  return (
+    <div className="rounded-2xl border border-border bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/40 p-4">
+      <div className="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">
+            Output level
+          </p>
+          <p className="mt-1 text-3xl font-bold tabular-nums text-[#3c0382]">{value}%</p>
+          <p className="text-[12px] font-medium text-ink-muted">{level}</p>
+        </div>
+        <div className="flex h-12 items-end gap-1" aria-hidden>
+          {[0.25, 0.45, 0.7, 1, 0.55, 0.85, 0.4].map((h, i) => {
+            const threshold = ((i + 1) / 7) * 100;
+            const active = value >= threshold;
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "w-1.5 rounded-full transition-all duration-300",
+                  active
+                    ? "bg-gradient-to-t from-[#3c0382] to-violet-500"
+                    : "bg-border",
+                )}
+                style={{ height: `${h * 40}px` }}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onChange(0)}
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+            value === 0
+              ? "border-[#3c0382] bg-[#3c0382] text-white"
+              : "border-border bg-white text-ink-muted hover:border-[#3c0382]/40",
+          )}
+          aria-label="Mute"
+        >
+          <VolumeX className="h-4 w-4" />
+        </button>
+
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={value}
+          onChange={(e) => onChange(+e.target.value)}
+          className="volume-range h-2 flex-1 cursor-pointer appearance-none rounded-full"
+          style={{
+            background: `linear-gradient(to right, #3c0382 0%, #7c3aed ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`,
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => onChange(100)}
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+            value === 100
+              ? "border-[#3c0382] bg-[#3c0382] text-white"
+              : "border-border bg-white text-ink-muted hover:border-[#3c0382]/40",
+          )}
+          aria-label="Max volume"
+        >
+          <Volume2 className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SectionCard({
   title,
   desc,
@@ -255,45 +485,45 @@ function StepNav({
         Setup progress
       </p>
       <ul className="space-y-1">
-        {STEPS.map((s) => {
+        {STEPS.map((s, index) => {
           const done = s.id < step;
           const active = s.id === step;
           const Icon = s.icon;
+          const styles = STEP_ICON_STYLES[index];
+
           return (
             <li key={s.id}>
               <button
                 type="button"
                 onClick={() => onStep(s.id)}
                 className={cn(
-                  "flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-all",
-                  active
-                    ? "bg-accent-soft ring-1 ring-accent/20"
-                    : done
-                      ? "hover:bg-surface-subtle"
-                      : "opacity-60 hover:bg-surface-subtle hover:opacity-100",
+                  "group/step flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-all hover:bg-surface-subtle",
+                  active && "bg-surface-subtle",
                 )}
               >
                 <span
                   className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 transition-all",
-                    active
-                      ? "border-accent bg-accent text-white shadow-sm"
-                      : done
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-600"
-                        : "border-border bg-white text-ink-hint",
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border-2 transition-colors duration-200 [&_svg]:shrink-0",
+                    done
+                      ? "border-emerald-500 bg-white text-emerald-600 group-hover/step:border-emerald-500 group-hover/step:bg-emerald-500 group-hover/step:text-white"
+                      : active
+                        ? cn(styles.active, "shadow-sm")
+                        : cn("bg-white", styles.idle, styles.hover),
                   )}
                 >
                   {done ? (
-                    <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                    <Check className="h-3.5 w-3.5" strokeWidth={2.75} />
                   ) : (
-                    <Icon className="h-3.5 w-3.5" />
+                    <Icon className="h-3.5 w-3.5" strokeWidth={2.25} />
                   )}
                 </span>
                 <span className="min-w-0">
                   <span
                     className={cn(
                       "block truncate text-[12px] font-semibold",
-                      active ? "text-accent" : "text-ink",
+                      done && "text-emerald-700",
+                      active && !done && styles.label,
+                      !done && !active && "text-ink",
                     )}
                   >
                     {s.label}
@@ -479,69 +709,109 @@ export function AgentCreationWizard({
       )}
 
       {step === 7 && (
-        <SectionCard
-          title="Variations"
-          desc="Alternative versions so the agent never sounds repetitive."
-          optional
-          accent="violet"
-        >
-          <div className="rounded-xl border border-border bg-surface-subtle/80 p-4">
-            <p className="mb-3 flex items-center gap-2 text-[13px] font-semibold text-ink">
-              Question 1 — type d&apos;assurance
-              <Badge>2 variations</Badge>
-            </p>
-            <div className="space-y-2">
-              <RecordingRow name="question_1_variation_a.mp3" play={false} />
-              <RecordingRow name="question_1_variation_b.mp3" play={false} />
+        <div className="space-y-4">
+          <div className="relative overflow-hidden rounded-2xl border border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 via-violet-50 to-indigo-50 p-5">
+            <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-fuchsia-300/20 blur-2xl" />
+            <div className="relative flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-fuchsia-500 bg-white text-fuchsia-600 shadow-sm">
+                <Shuffle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-semibold text-ink">Voice variations</h3>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">
+                  Upload alternate recordings so your agent sounds natural and never repetitive.
+                </p>
+              </div>
             </div>
-            <button
-              type="button"
-              className="mt-3 text-[12.5px] font-semibold text-accent hover:underline"
-            >
-              + Add variation for Question 1
-            </button>
           </div>
-          <FormField label="Add variation for another recording">
-            <div className="grid gap-3 sm:grid-cols-[1fr_200px]">
-              <UploadZone label="Upload variation" />
-              <CustomSelect
-                value={variationOf}
-                onChange={setVariationOf}
-                options={VARIATION_OPTIONS}
-              />
+
+          <section className="overflow-hidden rounded-2xl border border-fuchsia-200/60 bg-white shadow-soft">
+            <div className="h-1 bg-gradient-to-r from-fuchsia-500 via-violet-500 to-indigo-500" />
+            <div className="p-5">
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-[14px] font-semibold text-ink">Question 1 — type d&apos;assurance</p>
+                  <p className="text-[12px] text-ink-muted">2 variations uploaded</p>
+                </div>
+                <span className="rounded-full bg-fuchsia-100 px-2.5 py-1 text-[11px] font-bold text-fuchsia-700 ring-1 ring-fuchsia-200">
+                  A / B
+                </span>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                {["question_1_variation_a.mp3", "question_1_variation_b.mp3"].map((file, i) => (
+                  <div
+                    key={file}
+                    className="group relative overflow-hidden rounded-xl border border-border bg-gradient-to-b from-white to-fuchsia-50/40 p-3 transition-all hover:border-fuchsia-300 hover:shadow-soft"
+                  >
+                    <span className="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-lg bg-fuchsia-500 text-[11px] font-bold text-white">
+                      {i === 0 ? "A" : "B"}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <FileAudio className="h-4 w-4 shrink-0 text-fuchsia-500" />
+                      <p className="min-w-0 truncate text-[12px] font-medium text-ink">{file}</p>
+                    </div>
+                    <MiniWave />
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-fuchsia-300/80 bg-fuchsia-50/50 py-2.5 text-[12.5px] font-semibold text-fuchsia-700 transition-colors hover:border-fuchsia-500 hover:bg-fuchsia-50"
+              >
+                <Plus className="h-4 w-4" />
+                Add variation for Question 1
+              </button>
             </div>
-          </FormField>
-        </SectionCard>
+          </section>
+
+          <section className="rounded-2xl border border-border bg-white p-5 shadow-soft">
+            <FormField label="Add variation for another recording" hint="Pick a parent recording, then upload an alternate take">
+              <div className="grid gap-3">
+                <CustomSelect
+                  value={variationOf}
+                  onChange={setVariationOf}
+                  options={VARIATION_OPTIONS}
+                />
+                <UploadZone label="Upload variation" hint="MP3 or WAV — same script, different delivery" />
+              </div>
+            </FormField>
+          </section>
+        </div>
       )}
 
       {step === 8 && (
         <>
-          <SectionCard title="Background sound" desc="Soft ambient audio behind the agent's voice." optional>
-            <FormField label="Ambience">
-              <PillGroup
-                options={["None", "Office ambience", "Café ambience", "Call centre"]}
-                value={ambience}
-                onChange={setAmbience}
-              />
-            </FormField>
-            <FormField label="Volume">
-              <div className="flex items-center gap-4 rounded-xl border border-border bg-surface-subtle px-4 py-3">
-                <Volume2 className="h-4 w-4 shrink-0 text-ink-hint" />
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={volume}
-                  onChange={(e) => setVolume(+e.target.value)}
-                  className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-border accent-accent"
-                />
-                <span className="min-w-[44px] rounded-lg bg-white px-2 py-1 text-center text-[13px] font-bold text-ink shadow-sm">
-                  {volume}%
-                </span>
+          <div className="relative overflow-hidden rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-5">
+            <div className="pointer-events-none absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-indigo-300/20 blur-2xl" />
+            <div className="relative flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-indigo-500 bg-white text-indigo-600 shadow-sm">
+                <SlidersHorizontal className="h-5 w-5" />
               </div>
-            </FormField>
-            <UploadZone label="Or upload custom background" hint="Loops softly under the agent voice" />
-          </SectionCard>
+              <div>
+                <h3 className="text-[15px] font-semibold text-ink">Agent settings</h3>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">
+                  Fine-tune background ambience and how your agent sounds on calls.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-soft">
+            <div className="h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-[#3c0382]" />
+            <div className="space-y-5 p-5">
+              <FormField label="Background ambience" hint="Plays softly under the agent's voice during calls">
+                <AmbiencePicker value={ambience} onChange={setAmbience} />
+              </FormField>
+
+              <FormField label="Ambience volume">
+                <VolumeControl value={volume} onChange={setVolume} />
+              </FormField>
+
+              <UploadZone label="Or upload custom background" hint="Your own loop — MP3 or WAV" />
+            </div>
+          </section>
 
           <SectionCard
             title="Agent context"
@@ -582,7 +852,7 @@ export function AgentCreationWizard({
           <Button variant="secondary" className="w-full" onClick={() => onClose?.()}>
             Cancel
           </Button>
-          <Button color="violet" className="w-full gap-2" onClick={handleNext}>
+          <Button color="brand" className="w-full gap-2" onClick={handleNext}>
             {step === 8 ? "Create agent" : "Next"}
             {step < 8 && <ArrowRight className="h-4 w-4" />}
           </Button>

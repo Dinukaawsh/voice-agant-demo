@@ -1,17 +1,18 @@
 import { cn } from "@/lib/cn";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost";
-export type ButtonColor = "violet" | "blue" | "neutral";
+export type ButtonColor = "brand" | "violet" | "blue" | "neutral";
 
 const variantColorMap: Record<ButtonVariant, ButtonColor> = {
-  primary: "violet",
+  primary: "brand",
   secondary: "neutral",
   ghost: "neutral",
 };
 
 const colorClass: Record<ButtonColor, string> = {
-  violet: "btn-theme-violet",
-  blue: "btn-theme-blue",
+  brand: "btn-theme-brand",
+  violet: "btn-theme-brand",
+  blue: "btn-theme-brand",
   neutral: "btn-theme-neutral",
 };
 
@@ -23,7 +24,6 @@ export function Button({
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
-  /** Accent color — primary defaults to violet (agents theme) */
   color?: ButtonColor;
 }) {
   const resolvedColor = color ?? variantColorMap[variant];

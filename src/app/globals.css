@@ -345,36 +345,52 @@ body {
   transform: translateY(0);
 }
 
-.btn-theme-violet {
-  border-color: rgb(139 92 246);
+.btn-theme-brand {
+  border-color: #3c0382;
   background: white;
-  color: rgb(124 58 237);
+  color: #3c0382;
+}
+
+.btn-theme-brand:hover:not(:disabled) {
+  border-color: #3c0382;
+  color: white;
+  background: #3c0382;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.35),
+    0 0 20px rgb(60 3 130 / 0.5),
+    0 0 40px rgb(60 3 130 / 0.25);
+}
+
+.btn-theme-violet {
+  border-color: #3c0382;
+  background: white;
+  color: #3c0382;
 }
 
 .btn-theme-violet:hover:not(:disabled) {
-  border-color: transparent;
+  border-color: #3c0382;
   color: white;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+  background: #3c0382;
   box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.4),
-    0 0 20px rgb(139 92 246 / 0.55),
-    0 0 40px rgb(99 102 241 / 0.28);
+    0 0 0 1px rgb(255 255 255 / 0.35),
+    0 0 20px rgb(60 3 130 / 0.5),
+    0 0 40px rgb(60 3 130 / 0.25);
 }
 
 .btn-theme-blue {
-  border-color: rgb(59 130 246);
+  border-color: #3c0382;
   background: white;
-  color: rgb(37 99 235);
+  color: #3c0382;
 }
 
 .btn-theme-blue:hover:not(:disabled) {
-  border-color: transparent;
+  border-color: #3c0382;
   color: white;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #4f46e5 100%);
+  background: #3c0382;
   box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.4),
-    0 0 20px rgb(59 130 246 / 0.55),
-    0 0 40px rgb(79 70 229 / 0.25);
+    0 0 0 1px rgb(255 255 255 / 0.35),
+    0 0 20px rgb(60 3 130 / 0.5),
+    0 0 40px rgb(60 3 130 / 0.25);
 }
 
 .btn-theme-neutral {
@@ -407,4 +423,38 @@ body {
   background: rgb(248 250 252);
   color: rgb(15 23 42);
   box-shadow: 0 0 16px rgb(139 92 246 / 0.12);
+}
+
+/* Custom volume range slider */
+.volume-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  border: 3px solid white;
+  background: #3c0382;
+  box-shadow: 0 2px 8px rgb(60 3 130 / 0.45);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.volume-range::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.volume-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  border: 3px solid white;
+  background: #3c0382;
+  box-shadow: 0 2px 8px rgb(60 3 130 / 0.45);
+  cursor: pointer;
+}
+
+.volume-range::-moz-range-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: transparent;
 }
