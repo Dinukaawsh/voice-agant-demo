@@ -324,29 +324,24 @@ body {
   animation: slide-panel-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Theme buttons — sidebar-style fill + neon hover */
+/* Theme buttons — match filter control borders, no hover glow */
 .btn-theme {
   position: relative;
   border-width: 2px;
   border-style: solid;
+  box-shadow: none;
   transition:
-    color 0.28s ease,
-    background 0.28s ease,
-    border-color 0.28s ease,
-    box-shadow 0.28s ease,
-    transform 0.2s ease;
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .btn-theme:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.btn-theme:active:not(:disabled) {
-  transform: translateY(0);
+  box-shadow: none;
 }
 
 .btn-theme-brand {
-  border-color: #3c0382;
+  border-color: rgb(221 214 254 / 0.8);
   background: white;
   color: #3c0382;
 }
@@ -355,14 +350,10 @@ body {
   border-color: #3c0382;
   color: white;
   background: #3c0382;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.35),
-    0 0 20px rgb(60 3 130 / 0.5),
-    0 0 40px rgb(60 3 130 / 0.25);
 }
 
 .btn-theme-violet {
-  border-color: #3c0382;
+  border-color: rgb(221 214 254 / 0.8);
   background: white;
   color: #3c0382;
 }
@@ -371,14 +362,10 @@ body {
   border-color: #3c0382;
   color: white;
   background: #3c0382;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.35),
-    0 0 20px rgb(60 3 130 / 0.5),
-    0 0 40px rgb(60 3 130 / 0.25);
 }
 
 .btn-theme-blue {
-  border-color: #3c0382;
+  border-color: rgb(221 214 254 / 0.8);
   background: white;
   color: #3c0382;
 }
@@ -387,29 +374,18 @@ body {
   border-color: #3c0382;
   color: white;
   background: #3c0382;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.35),
-    0 0 20px rgb(60 3 130 / 0.5),
-    0 0 40px rgb(60 3 130 / 0.25);
 }
 
 .btn-theme-neutral {
-  border-color: rgb(203 213 225);
+  border-color: rgb(226 232 240 / 0.9);
   background: white;
   color: rgb(100 116 139);
 }
 
 .btn-theme-neutral:hover:not(:disabled) {
-  border-color: transparent;
-  color: rgb(15 23 42);
-  background: white;
-  box-shadow:
-    0 0 0 2px white,
-    0 0 0 3px #22d3ee,
-    0 0 0 5px #8b5cf6,
-    0 0 0 7px #ec4899,
-    0 0 22px rgb(139 92 246 / 0.45),
-    0 0 36px rgb(34 211 238 / 0.25);
+  border-color: #3c0382;
+  color: white;
+  background: #3c0382;
 }
 
 .btn-theme-ghost {
@@ -419,10 +395,9 @@ body {
 }
 
 .btn-theme-ghost:hover:not(:disabled) {
-  border-color: rgb(226 232 240);
+  border-color: rgb(226 232 240 / 0.9);
   background: rgb(248 250 252);
   color: rgb(15 23 42);
-  box-shadow: 0 0 16px rgb(139 92 246 / 0.12);
 }
 
 /* Custom volume range slider */

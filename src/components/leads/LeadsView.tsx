@@ -6,6 +6,7 @@ import {
   Download,
   Filter,
   Megaphone,
+  MoreHorizontal,
   PhoneMissed,
   Plus,
   Target,
@@ -444,7 +445,7 @@ export function LeadsView() {
                         align="right"
                         menuWidth={180}
                         trigger={
-                          <MetricIconButton icon={CircleDot} tone="slate" label="More options" />
+                          <MetricIconButton icon={MoreHorizontal} tone="slate" label="More options" />
                         }
                       >
                         <DropdownItem>View details</DropdownItem>
