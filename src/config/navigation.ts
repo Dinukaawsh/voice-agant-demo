@@ -67,7 +67,7 @@ export const NAV_ITEMS: NavItem[] = [
     iconActive: "border-emerald-500 bg-emerald-500 text-white",
   },
   {
-    label: "Billing",
+    label: "Cost analyser",
     href: "/billing",
     icon: CreditCard,
     description: "Cost analyser and usage billing",

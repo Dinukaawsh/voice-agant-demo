@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Bot,
   Filter,
@@ -15,71 +14,90 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AgentCreationModal } from "@/components/agents/AgentCreationModal";
-import { AgentWaveform } from "@/components/agents/AgentWaveform";
 import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
-import { playBonk } from "@/lib/playBonk";
 import { cn } from "@/lib/cn";
 
-type AgentStatus = "Live" | "Testing" | "Draft";
+type AgentStatus = "Ready" | "Live" | "Testing" | "Draft";
 
 type AgentRow = {
   id: string;
   name: string;
+  tier: string;
+  category: string;
   language: string;
   status: AgentStatus;
-  avatar: string;
+  backgroundSound: string;
+  backgroundVolume: number;
+  extractionFields: number;
+  created: string;
   calls: number;
   qualified: number;
-  updated: string;
 };
 
 const INITIAL_AGENTS: AgentRow[] = [
   {
-    id: "health-fr-july",
-    name: "Health insurance FR - July",
+    id: "lior-2",
+    name: "Lior 2",
+    tier: "Super agent",
+    category: "Insurance",
     language: "French",
-    status: "Live",
-    avatar: "/agents/agent-health.png",
+    status: "Ready",
+    backgroundSound: "Cafe Background",
+    backgroundVolume: 40,
+    extractionFields: 8,
+    created: "Jun 29, 2026",
     calls: 1240,
     qualified: 312,
-    updated: "2 days ago",
   },
   {
     id: "solar-en-q3",
     name: "Solar leads EN - Q3",
+    tier: "Standard agent",
+    category: "Solar",
     language: "English",
     status: "Live",
-    avatar: "/agents/agent-solar.png",
+    backgroundSound: "Office Ambience",
+    backgroundVolume: 25,
+    extractionFields: 5,
+    created: "Jun 18, 2026",
     calls: 580,
     qualified: 89,
-    updated: "5 days ago",
   },
   {
     id: "insurance-es-pilot",
     name: "Insurance ES - Pilot",
+    tier: "Standard agent",
+    category: "Insurance",
     language: "Spanish",
     status: "Testing",
-    avatar: "/agents/agent-insurance.png",
+    backgroundSound: "None",
+    backgroundVolume: 0,
+    extractionFields: 6,
+    created: "Jun 12, 2026",
     calls: 48,
     qualified: 12,
-    updated: "1 week ago",
   },
   {
     id: "mutuelle-fr",
     name: "Mutuelle comparison FR",
+    tier: "Standard agent",
+    category: "Health",
     language: "French",
     status: "Draft",
-    avatar: "/agents/agent-mutuelle.png",
+    backgroundSound: "Soft Rain",
+    backgroundVolume: 30,
+    extractionFields: 4,
+    created: "Jul 2, 2026",
     calls: 0,
     qualified: 0,
-    updated: "Just now",
   },
 ];
 
 const STATUS_OPTIONS = [
   { value: "all", label: "All statuses" },
+  { value: "Ready", label: "Ready" },
   { value: "Live", label: "Live" },
   { value: "Testing", label: "Testing" },
   { value: "Draft", label: "Draft" },
@@ -93,43 +111,76 @@ const LANGUAGE_OPTIONS = [
 ];
 
 const SORT_OPTIONS = [
-  { value: "newest", label: "Recently updated" },
+  { value: "newest", label: "Recently created" },
   { value: "calls", label: "Most calls" },
   { value: "qualified", label: "Most qualified" },
 ];
 
-const STATUS_STYLES: Record<
-  AgentStatus,
-  { dot: string; badge: string; wave: "cyan" | "purple" | "muted" }
-> = {
+const AGENT_AVATAR_GRADIENTS = [
+  "from-violet-500 to-purple-600",
+  "from-orange-500 to-rose-500",
+  "from-blue-500 to-indigo-600",
+  "from-emerald-500 to-teal-600",
+  "from-cyan-500 to-blue-600",
+] as const;
+
+const STATUS_STYLES: Record<AgentStatus, { dot: string; badge: string; ring: string }> = {
+  Ready: {
+    dot: "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]",
+    badge: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    ring: "ring-emerald-200",
+  },
   Live: {
     dot: "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]",
     badge: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    wave: "cyan",
+    ring: "ring-emerald-200",
   },
   Testing: {
     dot: "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]",
     badge: "bg-amber-50 text-amber-700 ring-amber-200",
-    wave: "purple",
+    ring: "ring-amber-200",
   },
   Draft: {
     dot: "bg-slate-400",
     badge: "bg-surface-muted text-slate-600 ring-border",
-    wave: "muted",
+    ring: "ring-border",
   },
 };
 
-function AgentAvatar({ name, avatar, status }: { name: string; avatar: string; status: AgentStatus }) {
-  const ring =
-    status === "Live"
-      ? "ring-emerald-200"
-      : status === "Testing"
-        ? "ring-amber-200"
-        : "ring-border";
+function agentInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 
+function agentAvatarGradient(id: string) {
+  const index = id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return AGENT_AVATAR_GRADIENTS[index % AGENT_AVATAR_GRADIENTS.length];
+}
+
+function AgentInitials({ name, id, status }: { name: string; id: string; status: AgentStatus }) {
   return (
-    <div className={cn("relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 shadow-sm", ring)}>
-      <Image src={avatar} alt={name} width={48} height={48} className="h-full w-full object-cover" />
+    <div
+      className={cn(
+        "flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[12px] font-bold text-white shadow-sm ring-2",
+        agentAvatarGradient(id),
+        STATUS_STYLES[status].ring,
+      )}
+    >
+      {agentInitials(name)}
+    </div>
+  );
+}
+
+function AgentDetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-hint">{label}</p>
+      <p className="truncate text-[12px] font-medium text-ink">{value}</p>
     </div>
   );
 }
@@ -138,14 +189,13 @@ export function AgentsView() {
   const [createOpen, setCreateOpen] = useState(false);
   const [agents, setAgents] = useState<AgentRow[]>(INITIAL_AGENTS);
   const [activeId, setActiveId] = useState(INITIAL_AGENTS[0]?.id);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [languageFilter, setLanguageFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
   const metrics = useMemo(() => {
-    const live = agents.filter((a) => a.status === "Live").length;
+    const live = agents.filter((a) => a.status === "Live" || a.status === "Ready").length;
     const testing = agents.filter((a) => a.status === "Testing").length;
     const totalCalls = agents.reduce((s, a) => s + a.calls, 0);
     const totalQualified = agents.reduce((s, a) => s + a.qualified, 0);
@@ -175,11 +225,6 @@ export function AgentsView() {
     return list;
   }, [agents, statusFilter, languageFilter, sortBy]);
 
-  const handleAgentHover = useCallback((id: string) => {
-    setHoveredId(id);
-    playBonk();
-  }, []);
-
   function clearFilters() {
     setStatusFilter("all");
     setLanguageFilter("all");
@@ -199,12 +244,16 @@ export function AgentsView() {
       {
         id,
         name: agent.name,
+        tier: "Standard agent",
+        category: "Insurance",
         language: langLabel,
         status: "Draft",
-        avatar: "/agents/agent-mutuelle.png",
+        backgroundSound: "None",
+        backgroundVolume: 0,
+        extractionFields: 0,
+        created: "Just now",
         calls: 0,
         qualified: 0,
-        updated: "Just now",
       },
       ...prev,
     ]);
@@ -356,7 +405,10 @@ export function AgentsView() {
           {visibleAgents.map((agent) => {
             const style = STATUS_STYLES[agent.status];
             const isSelected = agent.id === activeId;
-            const isHovered = agent.id === hoveredId;
+            const backgroundLabel =
+              agent.backgroundVolume > 0
+                ? `${agent.backgroundSound} · ${agent.backgroundVolume}%`
+                : agent.backgroundSound;
 
             return (
               <li key={agent.id}>
@@ -364,8 +416,6 @@ export function AgentsView() {
                   role="button"
                   tabIndex={0}
                   onClick={() => setActiveId(agent.id)}
-                  onMouseEnter={() => handleAgentHover(agent.id)}
-                  onMouseLeave={() => setHoveredId(null)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
@@ -373,53 +423,62 @@ export function AgentsView() {
                     }
                   }}
                   className={cn(
-                    "agent-card group flex cursor-pointer items-center gap-3 rounded-2xl border border-border bg-white px-4 py-4 shadow-soft sm:gap-4",
+                    "agent-card group flex cursor-pointer flex-col gap-4 rounded-2xl border border-border bg-white px-4 py-4 shadow-soft sm:flex-row sm:items-center sm:gap-5",
                     isSelected && "border-accent/30 bg-accent-soft ring-1 ring-accent/15",
                   )}
                 >
-                  <AgentAvatar name={agent.name} avatar={agent.avatar} status={agent.status} />
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <AgentInitials name={agent.name} id={agent.id} status={agent.status} />
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate text-[14px] font-semibold text-ink sm:text-[15px]">{agent.name}</p>
-                      <CustomDropdown
-                        align="right"
-                        menuWidth={176}
-                        trigger={
-                          <button
-                            type="button"
-                            onClick={(e) => e.stopPropagation()}
-                            className="ml-auto shrink-0 rounded-lg p-1.5 text-ink-hint opacity-0 transition-all hover:bg-surface-muted hover:text-ink group-hover:opacity-100 sm:ml-0"
-                            aria-label="More options"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </button>
-                        }
-                      >
-                        <DropdownItem>Edit agent</DropdownItem>
-                        <DropdownItem>Clone</DropdownItem>
-                        <DropdownItem>Test call</DropdownItem>
-                        <DropdownItem danger>Archive</DropdownItem>
-                      </CustomDropdown>
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset", style.badge)}>
-                        <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />
-                        {agent.status}
-                      </span>
-                      <span className="text-[12px] text-ink-muted">{agent.language}</span>
-                      {agent.calls > 0 && (
-                        <span className="hidden text-[12px] text-ink-hint sm:inline">
-                          {agent.calls.toLocaleString()} calls ·{" "}
-                          <span className="font-medium text-emerald-600">{agent.qualified} qualified</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-[15px] font-semibold text-ink">{agent.name}</p>
+                        <CustomDropdown
+                          align="right"
+                          menuWidth={176}
+                          trigger={
+                            <button
+                              type="button"
+                              onClick={(e) => e.stopPropagation()}
+                              className="ml-auto shrink-0 rounded-lg p-1.5 text-ink-hint opacity-0 transition-all hover:bg-surface-muted hover:text-ink group-hover:opacity-100 sm:ml-0"
+                              aria-label="More options"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                          }
+                        >
+                          <DropdownItem>Edit agent</DropdownItem>
+                          <DropdownItem>Clone</DropdownItem>
+                          <DropdownItem>Test call</DropdownItem>
+                          <DropdownItem danger>Archive</DropdownItem>
+                        </CustomDropdown>
+                      </div>
+
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-muted">
+                        <span className="font-medium text-ink-muted">{agent.tier}</span>
+                        <span className="text-ink-hint">·</span>
+                        <span>{agent.category}</span>
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset",
+                            style.badge,
+                          )}
+                        >
+                          <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />
+                          {agent.status}
                         </span>
-                      )}
-                      <span className="text-[12px] text-ink-hint sm:ml-auto">{agent.updated}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="hidden shrink-0 rounded-xl border border-border bg-surface-subtle px-2.5 py-2 sm:block">
-                    <AgentWaveform variant={style.wave} active={isHovered || isSelected} className="w-24 lg:w-28" />
+                  <div className="grid min-w-0 grid-cols-2 gap-x-5 gap-y-3 border-t border-border pt-3 sm:min-w-[300px] sm:border-0 sm:pt-0 lg:min-w-[360px]">
+                    <AgentDetailItem label="Language" value={agent.language} />
+                    <AgentDetailItem label="Background sound" value={backgroundLabel} />
+                    <AgentDetailItem
+                      label="Extraction fields"
+                      value={`${agent.extractionFields} field${agent.extractionFields === 1 ? "" : "s"}`}
+                    />
+                    <AgentDetailItem label="Created" value={agent.created} />
                   </div>
                 </div>
               </li>

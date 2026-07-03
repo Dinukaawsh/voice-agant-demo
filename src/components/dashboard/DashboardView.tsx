@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -14,9 +13,9 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { AgentWaveform } from "@/components/agents/AgentWaveform";
 import { Badge } from "@/components/ui/Badge";
 import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
+import { cn } from "@/lib/cn";
 
 const STATS = [
   {
@@ -77,24 +76,31 @@ const CALL_VOLUME = [
 
 const LIVE_AGENTS = [
   {
-    name: "Health insurance FR - July",
-    status: "Live",
-    avatar: "/agents/agent-health.png",
-    wave: "cyan" as const,
+    name: "Lior 2",
+    status: "Ready",
+    avatarBg: "from-violet-500 to-purple-600",
   },
   {
     name: "Solar leads EN - Q3",
     status: "Live",
-    avatar: "/agents/agent-solar.png",
-    wave: "cyan" as const,
+    avatarBg: "from-orange-500 to-rose-500",
   },
   {
     name: "Insurance ES - Pilot",
     status: "Testing",
-    avatar: "/agents/agent-insurance.png",
-    wave: "purple" as const,
+    avatarBg: "from-blue-500 to-indigo-600",
   },
 ];
+
+function agentInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 const CAMPAIGNS = [
   {
@@ -378,37 +384,36 @@ export function DashboardView() {
                 key={agent.name}
                 className="agent-row flex items-center gap-3 rounded-xl px-3 py-2.5"
               >
-                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-2 ring-white/15">
-                  <Image
-                    src={agent.avatar}
-                    alt={agent.name}
-                    width={36}
-                    height={36}
-                    className="h-full w-full object-cover"
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div
+                    className={cn(
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[11px] font-bold text-white shadow-sm ring-2 ring-white/15",
+                      agent.avatarBg,
+                    )}
+                  >
+                    {agentInitials(agent.name)}
+                  </div>
+                  <p className="truncate text-[12px] font-semibold text-white">{agent.name}</p>
+                </div>
+                <span className="flex shrink-0 items-center gap-1.5 text-[11px]">
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      agent.status === "Live" || agent.status === "Ready"
+                        ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+                        : "bg-amber-400",
+                    )}
                   />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12px] font-semibold text-white">
-                    {agent.name}
-                  </p>
-                  <span className="flex items-center gap-1.5 text-[11px]">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        agent.status === "Live"
-                          ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"
-                          : "bg-amber-400"
-                      }`}
-                    />
-                    <span
-                      className={
-                        agent.status === "Live" ? "text-emerald-300" : "text-amber-300"
-                      }
-                    >
-                      {agent.status}
-                    </span>
+                  <span
+                    className={
+                      agent.status === "Live" || agent.status === "Ready"
+                        ? "text-emerald-300"
+                        : "text-amber-300"
+                    }
+                  >
+                    {agent.status}
                   </span>
-                </div>
-                <AgentWaveform variant={agent.wave} className="w-14" />
+                </span>
               </li>
             ))}
           </ul>

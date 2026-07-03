@@ -12,6 +12,7 @@ export function SlidePanel({
   children,
   headerExtra,
   className,
+  size = "default",
 }: {
   open: boolean;
   onClose: () => void;
@@ -20,6 +21,7 @@ export function SlidePanel({
   children: React.ReactNode;
   headerExtra?: React.ReactNode;
   className?: string;
+  size?: "default" | "wide";
 }) {
   useEffect(() => {
     if (!open) return;
@@ -51,7 +53,10 @@ export function SlidePanel({
         aria-modal="true"
         aria-labelledby="slide-panel-title"
         className={cn(
-          "slide-panel-enter absolute inset-y-3 right-3 flex w-[min(100%,560px)] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-modal sm:inset-y-4 sm:right-4 sm:w-[min(100%,600px)] lg:w-[640px]",
+          "slide-panel-enter absolute inset-y-3 right-3 flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-modal sm:inset-y-4 sm:right-4",
+          size === "wide"
+            ? "w-[min(100%,680px)] sm:w-[min(100%,760px)] lg:w-[800px] xl:w-[840px]"
+            : "w-[min(100%,560px)] sm:w-[min(100%,600px)] lg:w-[640px]",
           className,
         )}
       >
