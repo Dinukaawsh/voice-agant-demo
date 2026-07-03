@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { cn } from "@/lib/cn";
 
 const STEPS = [
@@ -51,6 +52,14 @@ const AGENTS = [
   "Health insurance FR - July",
   "Solar leads EN - Q3",
   "Insurance ES - Pilot",
+];
+
+const AGENT_OPTIONS = AGENTS.map((a) => ({ value: a, label: a }));
+
+const TIMEZONE_OPTIONS = [
+  { value: "Europe/Paris", label: "Europe/Paris (CET)" },
+  { value: "Europe/London", label: "Europe/London (GMT)" },
+  { value: "America/New_York", label: "America/New_York (EST)" },
 ];
 
 const LEAD_LISTS = [
@@ -161,6 +170,7 @@ export function CampaignCreationWizard({
   const [step, setStep] = useState(1);
   const [name, setName] = useState("Health FR - August outbound");
   const [agent, setAgent] = useState(AGENTS[0]);
+  const [timezone, setTimezone] = useState(TIMEZONE_OPTIONS[0].value);
   const [selectedLists, setSelectedLists] = useState<string[]>([LEAD_LISTS[0].name]);
   const [days, setDays] = useState<string[]>(["Mon", "Tue", "Wed", "Thu", "Fri"]);
 
@@ -184,6 +194,9 @@ export function CampaignCreationWizard({
     selectedLists.includes(l.name),
   ).reduce((sum, l) => sum + l.count, 0);
 
+  const timezoneLabel =
+    TIMEZONE_OPTIONS.find((t) => t.value === timezone)?.label ?? timezone;
+
   function handleNext() {
     if (step < 4) {
       goTo(step + 1);
@@ -196,7 +209,7 @@ export function CampaignCreationWizard({
       leads: selectedLeadCount,
       called: 0,
       qualified: 0,
-      schedule: `${days.join(", ")} · 9:00-18:00 CET`,
+      schedule: `${days.join(", ")} · 9:00-18:00 ${timezoneLabel}`,
     });
     onClose?.();
   }
@@ -216,15 +229,12 @@ export function CampaignCreationWizard({
               />
             </FormField>
             <FormField label="Voice agent">
-              <select
+              <CustomSelect
                 value={agent}
-                onChange={(e) => setAgent(e.target.value)}
-                className={inputClass}
-              >
-                {AGENTS.map((a) => (
-                  <option key={a}>{a}</option>
-                ))}
-              </select>
+                onChange={setAgent}
+                options={AGENT_OPTIONS}
+                placeholder="Select an agent"
+              />
             </FormField>
             <FormField label="Description" hint="Optional — shown in your campaigns list">
               <input
@@ -321,11 +331,12 @@ export function CampaignCreationWizard({
               </FormField>
             </div>
             <FormField label="Timezone">
-              <select className={inputClass}>
-                <option>Europe/Paris (CET)</option>
-                <option>Europe/London (GMT)</option>
-                <option>America/New_York (EST)</option>
-              </select>
+              <CustomSelect
+                value={timezone}
+                onChange={setTimezone}
+                options={TIMEZONE_OPTIONS}
+                placeholder="Select timezone"
+              />
             </FormField>
             <FormField label="Max calls per hour">
               <input type="number" defaultValue={120} className={inputClass} />
@@ -350,7 +361,7 @@ export function CampaignCreationWizard({
                     selectedLists.length > 1 ? "Lead lists" : "Lead list",
                     selectedLists.join(", ") || "None selected",
                   ],
-                  ["Schedule", `${days.join(", ")} · 9:00–18:00 CET`],
+                  ["Schedule", `${days.join(", ")} · 9:00–18:00 ${timezoneLabel}`],
                   ["Total leads", selectedLeadCount.toLocaleString()],
                 ].map(([k, v]) => (
                   <div
