@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { AgentWaveform } from "@/components/agents/AgentWaveform";
 import { Badge } from "@/components/ui/Badge";
+import { MetricIconBox } from "@/components/ui/MetricIconBox";
 
 const STATS = [
   {
@@ -25,7 +26,7 @@ const STATS = [
     sub: "vs yesterday",
     trend: "up" as const,
     icon: PhoneCall,
-    gradient: "from-blue-500 to-indigo-600",
+    tone: "blue" as const,
     glow: "bg-blue-500/10",
     ring: "ring-blue-500/20",
   },
@@ -36,7 +37,7 @@ const STATS = [
     sub: "vs yesterday",
     trend: "up" as const,
     icon: Users,
-    gradient: "from-emerald-500 to-teal-600",
+    tone: "emerald" as const,
     glow: "bg-emerald-500/10",
     ring: "ring-emerald-500/20",
   },
@@ -47,7 +48,7 @@ const STATS = [
     sub: "vs last week",
     trend: "neutral" as const,
     icon: Clock,
-    gradient: "from-violet-500 to-purple-600",
+    tone: "violet" as const,
     glow: "bg-violet-500/10",
     ring: "ring-violet-500/20",
   },
@@ -58,7 +59,7 @@ const STATS = [
     sub: "2 in testing",
     trend: "neutral" as const,
     icon: Bot,
-    gradient: "from-orange-500 to-rose-500",
+    tone: "orange" as const,
     glow: "bg-orange-500/10",
     ring: "ring-orange-500/20",
   },
@@ -241,11 +242,7 @@ export function DashboardView() {
               <div className={`dashboard-stat-glow ${stat.glow}`} />
               <div className="relative">
                 <div className="mb-4 flex items-start justify-between">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${stat.gradient} text-white shadow-md`}
-                  >
-                    <Icon className="h-[18px] w-[18px]" strokeWidth={2.25} />
-                  </div>
+                  <MetricIconBox icon={Icon} tone={stat.tone} />
                   {stat.trend === "up" && (
                     <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
                       <TrendingUp className="h-3 w-3" />
