@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { AgentWaveform } from "@/components/agents/AgentWaveform";
 import { Badge } from "@/components/ui/Badge";
-import { MetricIconBox } from "@/components/ui/MetricIconBox";
+import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
 
 const STATS = [
   {
@@ -231,43 +231,39 @@ export function DashboardView() {
       </section>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <MetricStatGrid>
         {STATS.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
+            <MetricStatCard
               key={stat.label}
-              className={`dashboard-stat-card group relative overflow-hidden rounded-2xl border border-border bg-white p-5 shadow-soft ring-1 ${stat.ring} transition-all hover:-translate-y-0.5 hover:shadow-card`}
-            >
-              <div className={`dashboard-stat-glow ${stat.glow}`} />
-              <div className="relative">
-                <div className="mb-4 flex items-start justify-between">
-                  <MetricIconBox icon={Icon} tone={stat.tone} />
-                  {stat.trend === "up" && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
-                      <TrendingUp className="h-3 w-3" />
-                      {stat.change}
-                    </span>
-                  )}
-                </div>
-                <p className="text-[12px] font-medium uppercase tracking-wide text-ink-hint">
-                  {stat.label}
-                </p>
-                <p className="mt-1 text-3xl font-bold tracking-tight text-ink">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-[12px] text-ink-muted">
-                  {stat.trend === "up" ? stat.sub : (
-                    <>
-                      <span className="font-medium text-ink-muted">{stat.change}</span> · {stat.sub}
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
+              label={stat.label}
+              value={stat.value}
+              sub={
+                stat.trend === "up" ? (
+                  stat.sub
+                ) : (
+                  <>
+                    <span className="font-medium text-ink-muted">{stat.change}</span> · {stat.sub}
+                  </>
+                )
+              }
+              icon={Icon}
+              tone={stat.tone}
+              ring={stat.ring}
+              glow={stat.glow}
+              badge={
+                stat.trend === "up" ? (
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600">
+                    <TrendingUp className="h-2.5 w-2.5" />
+                    {stat.change}
+                  </span>
+                ) : undefined
+              }
+            />
           );
         })}
-      </div>
+      </MetricStatGrid>
 
       {/* Chart + Live agents */}
       <div className="grid gap-6 lg:grid-cols-12">

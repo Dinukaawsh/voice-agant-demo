@@ -22,7 +22,8 @@ import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 import { CustomCheckbox } from "@/components/ui/CustomCheckbox";
 import { Pagination } from "@/components/ui/Pagination";
 import { CustomSelect } from "@/components/ui/CustomSelect";
-import { MetricIconBox, MetricIconButton } from "@/components/ui/MetricIconBox";
+import { MetricIconButton } from "@/components/ui/MetricIconBox";
+import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
 import { BulkSelectionActionBar } from "@/components/ui/BulkSelectionActionBar";
 import { LeadStatusIndicator, leadStatusAccent } from "@/components/leads/LeadStatusIndicator";
 import { cn } from "@/lib/cn";
@@ -265,36 +266,28 @@ export function LeadsView() {
   return (
     <>
       <div className="animate-fade-up space-y-6 p-5 pb-24 lg:p-8 lg:pb-28">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {statCards.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className={cn(
-                  "dashboard-stat-card group relative overflow-hidden rounded-2xl border border-border bg-white p-5 shadow-soft ring-1 transition-all hover:-translate-y-0.5 hover:shadow-card",
-                  stat.ring,
-                )}
-              >
-                <div className={cn("dashboard-stat-glow", stat.glow)} />
-                <div className="relative">
-                  <div className="mb-4 flex items-start justify-between">
-                    <MetricIconBox icon={Icon} tone={stat.tone} />
-                    {stat.trend && (
-                      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
-                        <TrendingUp className="h-3 w-3" />
-                        {metrics.convRate}%
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[12px] font-medium uppercase tracking-wide text-ink-hint">{stat.label}</p>
-                  <p className="mt-1 text-3xl font-bold tracking-tight text-ink">{stat.value}</p>
-                  <p className="mt-1 text-[12px] text-ink-muted">{stat.sub}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <MetricStatGrid>
+          {statCards.map((stat) => (
+            <MetricStatCard
+              key={stat.label}
+              label={stat.label}
+              value={stat.value}
+              sub={stat.sub}
+              icon={stat.icon}
+              tone={stat.tone}
+              ring={stat.ring}
+              glow={stat.glow}
+              badge={
+                stat.trend ? (
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600">
+                    <TrendingUp className="h-2.5 w-2.5" />
+                    {metrics.convRate}%
+                  </span>
+                ) : undefined
+              }
+            />
+          ))}
+        </MetricStatGrid>
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-end gap-2">

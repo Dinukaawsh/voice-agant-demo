@@ -26,24 +26,33 @@ export const METRIC_ICON_TONE_CLASSES: Record<MetricIconTone, string> = {
 
 const TONE_CLASSES = METRIC_ICON_TONE_CLASSES;
 
+const ICON_SIZES = {
+  md: { box: "h-10 w-10 rounded-xl", icon: "h-[18px] w-[18px]" },
+  sm: { box: "h-8 w-8 rounded-lg", icon: "h-[15px] w-[15px]" },
+} as const;
+
 export function MetricIconBox({
   icon: Icon,
   tone,
   className,
+  size = "md",
 }: {
   icon: LucideIcon;
   tone: MetricIconTone;
   className?: string;
+  size?: keyof typeof ICON_SIZES;
 }) {
+  const s = ICON_SIZES[size];
   return (
     <div
       className={cn(
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2",
+        "flex shrink-0 items-center justify-center border-2",
+        s.box,
         TONE_CLASSES[tone],
         className,
       )}
     >
-      <Icon className="h-[18px] w-[18px]" strokeWidth={2.25} />
+      <Icon className={s.icon} strokeWidth={2.25} />
     </div>
   );
 }
