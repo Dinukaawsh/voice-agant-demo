@@ -359,7 +359,7 @@ export function LeadsView() {
         </p>
 
         <Card className="overflow-hidden p-0">
-          <div className="hidden border-b border-border bg-gradient-to-r from-cyan-50/50 via-white to-violet-50/30 px-5 py-3 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_72px_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
+          <div className="hidden border-b border-border bg-gradient-to-r from-cyan-50/50 via-white to-violet-50/30 px-5 py-3 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_minmax(118px,auto)_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
             <span className="flex justify-center">
               <CustomCheckbox
                 checked={allPageSelected || selectAllFiltered}
@@ -392,7 +392,7 @@ export function LeadsView() {
                       : "hover:bg-gradient-to-r hover:from-cyan-50/30 hover:to-transparent",
                   )}
                 >
-                  <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_72px_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
+                  <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_minmax(118px,auto)_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
                     <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
                       <CustomCheckbox
                         checked={isSelected}
