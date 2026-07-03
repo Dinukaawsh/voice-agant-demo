@@ -132,12 +132,19 @@ export function AgentsView() {
   }, []);
 
   function handleCreateAgent(agent: { name: string; language: string }) {
+    const langLabel =
+      agent.language === "fr"
+        ? "French"
+        : agent.language === "es"
+          ? "Spanish"
+          : "English";
+
     const id = crypto.randomUUID();
     setAgents((prev) => [
       {
         id,
         name: agent.name,
-        language: agent.language,
+        language: langLabel,
         status: "Draft",
         avatar: "/agents/agent-mutuelle.png",
         calls: 0,
