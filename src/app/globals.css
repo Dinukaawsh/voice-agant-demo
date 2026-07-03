@@ -124,6 +124,66 @@ body {
   animation: agent-wave-shift 2.8s ease-in-out infinite;
 }
 
+@keyframes wave-bar-bounce {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes wave-bar-bounce-fast {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scaleY(1.15);
+    opacity: 1;
+  }
+}
+
+.agent-wave-bar {
+  transform-origin: bottom center;
+  animation: wave-bar-bounce 0.85s ease-in-out infinite;
+}
+
+.agent-wave-bar-fast {
+  animation-name: wave-bar-bounce-fast;
+  animation-duration: 0.45s;
+}
+
+@keyframes agent-card-pump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.028);
+  }
+  100% {
+    transform: scale(1.02);
+  }
+}
+
+.agent-card {
+  transition:
+    transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    background-color 0.22s ease;
+}
+
+.agent-card:hover {
+  animation: agent-card-pump 0.28s cubic-bezier(0.34, 1.5, 0.64, 1) forwards;
+  box-shadow: var(--shadow-card);
+  border-color: rgb(37 99 235 / 0.25);
+}
+
 .agent-panel {
   background:
     radial-gradient(ellipse 80% 60% at 10% 0%, rgb(99 102 241 / 0.35), transparent 55%),
