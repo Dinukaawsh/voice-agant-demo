@@ -5,7 +5,6 @@ import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 
 export function MockShell({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -19,10 +18,8 @@ export function MockShell({ children }: { children: React.ReactNode }) {
         />
       )}
       <Sidebar
-        collapsed={collapsed}
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
-        onToggleCollapsed={() => setCollapsed((value) => !value)}
       />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <TopBar onMenuClick={() => setMobileOpen((v) => !v)} />
