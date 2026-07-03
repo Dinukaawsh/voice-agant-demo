@@ -35,7 +35,7 @@ export function CustomCheckbox({
   return (
     <span
       className={cn(
-        "group relative inline-flex h-5 w-5 shrink-0 rounded-md focus-within:ring-2 focus-within:ring-accent/35 focus-within:ring-offset-2",
+        "group relative inline-flex h-[22px] w-[22px] shrink-0 rounded-[8px] focus-within:ring-4 focus-within:ring-[#3c0382]/15",
         className,
       )}
     >
@@ -55,23 +55,24 @@ export function CustomCheckbox({
       <span
         aria-hidden
         className={cn(
-          "pointer-events-none flex h-5 w-5 items-center justify-center rounded-md border-2 shadow-sm transition-all",
-          isActive
-            ? "border-accent bg-accent text-white"
-            : "border-border-strong bg-surface",
-          !disabled &&
-            !isActive &&
-            "group-hover:border-accent/60 group-hover:bg-accent-soft/50",
-          disabled && "opacity-50",
+          "pointer-events-none flex h-[22px] w-[22px] items-center justify-center rounded-[8px] border-2 transition-all duration-200",
+          indeterminate &&
+            "border-violet-600 bg-violet-200 text-violet-700 shadow-sm shadow-violet-500/10",
+          !indeterminate &&
+            checked &&
+            "border-[#3c0382] bg-[#3c0382] text-white shadow-md shadow-[#3c0382]/25",
+          !isActive &&
+            "border-slate-300 bg-white shadow-sm group-hover:border-violet-400 group-hover:bg-violet-50/90",
+          disabled && "opacity-45",
         )}
       >
         {indeterminate ? (
-          <Minus className="h-3.5 w-3.5 stroke-[2.5]" />
+          <Minus className="h-3.5 w-3.5 stroke-[3] checkbox-pop" />
         ) : (
           <Check
             className={cn(
-              "h-3.5 w-3.5 stroke-[2.5] transition-all duration-150",
-              checked ? "scale-100 opacity-100" : "scale-75 opacity-0",
+              "h-3.5 w-3.5 stroke-[3] transition-all duration-200",
+              checked ? "checkbox-pop scale-100 opacity-100" : "scale-50 opacity-0",
             )}
           />
         )}

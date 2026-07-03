@@ -2,36 +2,32 @@
 
 import { useMemo, useState } from "react";
 import {
-  Plus,
-  Upload,
-  Filter,
-  Search,
-  MoreHorizontal,
-  Megaphone,
-  Download,
   CircleDot,
+  Download,
+  Filter,
+  Megaphone,
+  PhoneMissed,
+  Plus,
+  Target,
   Trash2,
+  TrendingUp,
+  Upload,
+  User,
+  Users,
+  X,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 import { CustomCheckbox } from "@/components/ui/CustomCheckbox";
+import { Pagination } from "@/components/ui/Pagination";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import { MetricIconBox, MetricIconButton } from "@/components/ui/MetricIconBox";
 import { BulkSelectionActionBar } from "@/components/ui/BulkSelectionActionBar";
+import { LeadStatusIndicator, leadStatusAccent } from "@/components/leads/LeadStatusIndicator";
+import { cn } from "@/lib/cn";
 
 const TOTAL_LEADS = 6950;
-
-const LEAD_METRICS = [
-  { key: "total", label: "Total", value: 6950, color: "text-ink", bg: "bg-surface" },
-  { key: "pending", label: "Pending", value: 2104, color: "text-slate-600", bg: "bg-slate-50" },
-  { key: "eligible", label: "Eligible", value: 892, color: "text-emerald-700", bg: "bg-emerald-50" },
-  { key: "in_progress", label: "In progress", value: 156, color: "text-blue-700", bg: "bg-blue-50" },
-  { key: "calling", label: "Calling", value: 24, color: "text-indigo-700", bg: "bg-indigo-50" },
-  { key: "no_answer", label: "No answer", value: 1842, color: "text-amber-700", bg: "bg-amber-50" },
-  { key: "qualified", label: "Qualified", value: 412, color: "text-green", bg: "bg-green-soft" },
-  { key: "callback", label: "Callback", value: 89, color: "text-violet-700", bg: "bg-violet-50" },
-  { key: "failed", label: "Failed", value: 31, color: "text-red-700", bg: "bg-red-50" },
-];
 
 type LeadRow = {
   id: string;
@@ -100,24 +96,73 @@ const LEADS: LeadRow[] = [
   },
 ];
 
-const STATUS_TABS = ["All", "Qualified", "Callback", "No answer", "Not called"];
+const STATUS_OPTIONS = [
+  { value: "all", label: "All statuses" },
+  { value: "Qualified", label: "Qualified" },
+  { value: "Callback", label: "Callback" },
+  { value: "In progress", label: "In progress" },
+  { value: "No answer", label: "No answer" },
+  { value: "Not called", label: "Not called" },
+];
 
-function statusVariant(status: string) {
-  if (status === "Qualified") return "green" as const;
-  if (status === "Callback" || status === "In progress") return "blue" as const;
-  if (status === "No answer") return "amber" as const;
-  return "default" as const;
-}
+const SORT_OPTIONS = [
+  { value: "newest", label: "Recently called" },
+  { value: "attempts", label: "Most attempts" },
+  { value: "name", label: "Name A–Z" },
+];
 
 export function LeadsView() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectAllFiltered, setSelectAllFiltered] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [listFilter, setListFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
 
-  const pageIds = useMemo(() => LEADS.map((l) => l.id), []);
-  const allPageSelected =
-    pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
-  const somePageSelected =
-    pageIds.some((id) => selectedIds.has(id)) && !allPageSelected;
+  const listOptions = useMemo(() => {
+    const lists = [...new Set(LEADS.map((l) => l.list))];
+    return [{ value: "all", label: "All lists" }, ...lists.map((l) => ({ value: l, label: l }))];
+  }, []);
+
+  const metrics = useMemo(
+    () => ({
+      total: TOTAL_LEADS,
+      qualified: 412,
+      pending: 2104,
+      noAnswer: 1842,
+      convRate: Math.round((412 / TOTAL_LEADS) * 100),
+    }),
+    [],
+  );
+
+  const activeFilterCount = [
+    statusFilter !== "all",
+    listFilter !== "all",
+    sortBy !== "newest",
+  ].filter(Boolean).length;
+
+  const filteredLeads = useMemo(() => {
+    let list = LEADS.filter((l) => {
+      if (statusFilter !== "all" && l.status !== statusFilter) return false;
+      if (listFilter !== "all" && l.list !== listFilter) return false;
+      return true;
+    });
+
+    list = [...list].sort((a, b) => {
+      if (sortBy === "attempts") return b.attempts - a.attempts;
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      return 0;
+    });
+
+    return list;
+  }, [statusFilter, listFilter, sortBy]);
+
+  const pageIds = useMemo(() => filteredLeads.map((l) => l.id), [filteredLeads]);
+  const totalPages = Math.max(1, Math.ceil(TOTAL_LEADS / pageSize));
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = pageIds.some((id) => selectedIds.has(id)) && !allPageSelected;
   const hasSelection = selectAllFiltered || selectedIds.size > 0;
   const effectiveCount = selectAllFiltered ? TOTAL_LEADS : selectedIds.size;
 
@@ -153,188 +198,291 @@ export function LeadsView() {
     setSelectedIds(new Set(pageIds));
   }
 
+  function clearFilters() {
+    setStatusFilter("all");
+    setListFilter("all");
+    setSortBy("newest");
+  }
+
+  const statCards = [
+    {
+      label: "Total leads",
+      value: metrics.total.toLocaleString(),
+      sub: "Organization-wide",
+      icon: Users,
+      tone: "blue" as const,
+      glow: "bg-blue-500/10",
+      ring: "ring-blue-500/20",
+    },
+    {
+      label: "Qualified",
+      value: metrics.qualified.toLocaleString(),
+      sub: `${metrics.convRate}% of total`,
+      icon: Target,
+      tone: "emerald" as const,
+      glow: "bg-emerald-500/10",
+      ring: "ring-emerald-500/20",
+      trend: true,
+    },
+    {
+      label: "Pending",
+      value: metrics.pending.toLocaleString(),
+      sub: "Awaiting contact",
+      icon: User,
+      tone: "slate" as const,
+      glow: "bg-slate-500/10",
+      ring: "ring-slate-500/20",
+    },
+    {
+      label: "No answer",
+      value: metrics.noAnswer.toLocaleString(),
+      sub: "Needs retry",
+      icon: PhoneMissed,
+      tone: "amber" as const,
+      glow: "bg-amber-500/10",
+      ring: "ring-amber-500/20",
+    },
+  ];
+
+  const filterFields = (
+    <>
+      <CustomSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} size="sm" className="w-[140px]" />
+      <CustomSelect value={listFilter} onChange={setListFilter} options={listOptions} size="sm" className="w-[160px]" />
+      <CustomSelect value={sortBy} onChange={setSortBy} options={SORT_OPTIONS} size="sm" className="w-[150px]" />
+      {activeFilterCount > 0 && (
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-white px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+        >
+          <X className="h-3 w-3" />
+          Clear
+        </button>
+      )}
+    </>
+  );
+
   return (
     <>
-      <div className="animate-fade-up p-5 pb-24 lg:p-8 lg:pb-28">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-ink-muted">Organization totals</p>
-        </div>
-        <div className="mb-6 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
-          {LEAD_METRICS.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              className={`rounded-xl border border-border px-2 py-3 text-center transition-all hover:border-accent/30 hover:shadow-soft ${m.bg}`}
-            >
-              <p className={`text-lg font-bold leading-none ${m.color}`}>
-                {m.value.toLocaleString()}
-              </p>
-              <p className="mt-1.5 truncate text-[10px] font-medium text-ink-muted">
-                {m.label}
-              </p>
-            </button>
-          ))}
+      <div className="animate-fade-up space-y-6 p-5 pb-24 lg:p-8 lg:pb-28">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {statCards.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className={cn(
+                  "dashboard-stat-card group relative overflow-hidden rounded-2xl border border-border bg-white p-5 shadow-soft ring-1 transition-all hover:-translate-y-0.5 hover:shadow-card",
+                  stat.ring,
+                )}
+              >
+                <div className={cn("dashboard-stat-glow", stat.glow)} />
+                <div className="relative">
+                  <div className="mb-4 flex items-start justify-between">
+                    <MetricIconBox icon={Icon} tone={stat.tone} />
+                    {stat.trend && (
+                      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
+                        <TrendingUp className="h-3 w-3" />
+                        {metrics.convRate}%
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[12px] font-medium uppercase tracking-wide text-ink-hint">{stat.label}</p>
+                  <p className="mt-1 text-3xl font-bold tracking-tight text-ink">{stat.value}</p>
+                  <p className="mt-1 text-[12px] text-ink-muted">{stat.sub}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {STATUS_TABS.map((tab, i) => (
-              <button
-                key={tab}
-                type="button"
-                className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                  i === 0
-                    ? "bg-accent text-white shadow-sm shadow-accent/20"
-                    : "border border-border bg-surface text-ink-muted hover:border-accent/40 hover:text-accent"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-end gap-2">
+            <div
+              className={cn(
+                "filter-strip hidden origin-right items-center justify-end gap-2 overflow-hidden sm:flex",
+                filtersOpen ? "filter-strip-open" : "filter-strip-closed",
+              )}
+            >
+              <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">{filterFields}</div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((v) => !v)}
+              aria-expanded={filtersOpen}
+              aria-label="Toggle filters"
+              className={cn(
+                "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 transition-all duration-200",
+                filtersOpen
+                  ? "border-[#3c0382] bg-[#3c0382] text-white shadow-md"
+                  : "border-cyan-200/80 bg-white text-cyan-600 shadow-sm hover:border-[#3c0382] hover:bg-[#3c0382] hover:text-white",
+              )}
+            >
+              <Filter className="h-4 w-4" strokeWidth={2.25} />
+              {activeFilterCount > 0 && !filtersOpen && (
+                <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#3c0382] px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
             <Button variant="secondary">
               <Upload className="h-4 w-4" />
               Import
             </Button>
-            <Button>
+            <Button color="brand">
               <Plus className="h-4 w-4" />
               Add lead
             </Button>
           </div>
+
+          <div className={cn("grid gap-2 overflow-hidden transition-all duration-300 sm:hidden", filtersOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0")}>
+            <CustomSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} size="sm" />
+            <CustomSelect value={listFilter} onChange={setListFilter} options={listOptions} size="sm" />
+            <CustomSelect value={sortBy} onChange={setSortBy} options={SORT_OPTIONS} size="sm" />
+            {activeFilterCount > 0 && (
+              <button type="button" onClick={clearFilters} className="inline-flex items-center justify-center gap-1 rounded-full border border-border bg-white py-2 text-[12px] font-semibold text-ink-muted">
+                <X className="h-3.5 w-3.5" />
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
 
+        <p className="text-[13px] text-ink-muted">
+          Showing <span className="font-semibold text-ink">{filteredLeads.length}</span> of{" "}
+          {TOTAL_LEADS.toLocaleString()} leads
+          {activeFilterCount > 0 && (
+            <span className="text-ink-hint"> · {activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""} active</span>
+          )}
+        </p>
+
         <Card className="overflow-hidden p-0">
-          <div className="flex flex-col gap-3 border-b border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[13px] text-ink-muted">
-              <span className="font-semibold text-ink">
-                {TOTAL_LEADS.toLocaleString()}
-              </span>{" "}
-              leads total
-            </p>
-            <div className="flex items-center gap-2">
-              <div className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-surface-subtle px-3 py-2 text-ink-hint sm:flex-none">
-                <Search className="h-3.5 w-3.5" />
-                <span className="text-[13px]">Search leads…</span>
-              </div>
-              <button
-                type="button"
-                className="rounded-lg border border-border p-2 text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
-              >
-                <Filter className="h-4 w-4" />
+          <div className="hidden border-b border-border bg-gradient-to-r from-cyan-50/50 via-white to-violet-50/30 px-5 py-3 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_72px_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
+            <span className="flex justify-center">
+              <CustomCheckbox
+                checked={allPageSelected || selectAllFiltered}
+                indeterminate={somePageSelected && !selectAllFiltered}
+                onCheckedChange={toggleSelectAllPage}
+                aria-label="Select all on this page"
+              />
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Name</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Phone</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">List</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Status</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Last call</span>
+            <span className="text-right text-[11px] font-semibold uppercase tracking-wider text-ink-hint">Tries</span>
+            <span />
+          </div>
+
+          <div className="divide-y divide-border/60">
+            {filteredLeads.map((lead) => {
+              const isSelected = selectAllFiltered || selectedIds.has(lead.id);
+
+              return (
+                <div
+                  key={lead.id}
+                  className={cn(
+                    "group border-l-[3px] px-4 py-4 transition-colors sm:px-5",
+                    leadStatusAccent(lead.status),
+                    isSelected
+                      ? "bg-violet-50/60 hover:bg-violet-50/80"
+                      : "hover:bg-gradient-to-r hover:from-cyan-50/30 hover:to-transparent",
+                  )}
+                >
+                  <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[40px_minmax(140px,1fr)_minmax(120px,1fr)_minmax(100px,0.8fr)_72px_minmax(100px,0.9fr)_64px_48px] lg:items-center lg:gap-3">
+                    <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
+                      <CustomCheckbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleLead(lead.id)}
+                        aria-label={`Select ${lead.name}`}
+                      />
+                    </div>
+
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-cyan-600 bg-cyan-200 text-sm font-bold text-cyan-600">
+                        {lead.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .slice(0, 2)}
+                      </div>
+                      <p className="truncate font-semibold text-ink">{lead.name}</p>
+                    </div>
+
+                    <p className="font-mono text-[13px] text-ink-muted">
+                      <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">Phone · </span>
+                      {lead.phone}
+                    </p>
+
+                    <p className="truncate text-[13px] text-ink-muted">
+                      <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">List · </span>
+                      {lead.list}
+                    </p>
+
+                    <div>
+                      <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">Status · </span>
+                      <LeadStatusIndicator status={lead.status} />
+                    </div>
+
+                    <p className="text-[13px] text-ink-muted">
+                      <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">Last call · </span>
+                      {lead.lastCall}
+                    </p>
+
+                    <p className="text-right tabular-nums">
+                      <span className="text-[10px] font-semibold uppercase text-ink-hint lg:hidden">Tries </span>
+                      <span
+                        className={cn(
+                          "inline-flex min-w-[1.75rem] justify-center rounded-lg px-2 py-0.5 font-semibold",
+                          lead.attempts >= 3
+                            ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200/80"
+                            : "text-ink-muted",
+                        )}
+                      >
+                        {lead.attempts}
+                      </span>
+                    </p>
+
+                    <div className="flex justify-end lg:opacity-70 lg:transition-opacity lg:group-hover:opacity-100">
+                      <CustomDropdown
+                        align="right"
+                        menuWidth={180}
+                        trigger={
+                          <MetricIconButton icon={CircleDot} tone="slate" label="More options" />
+                        }
+                      >
+                        <DropdownItem>View details</DropdownItem>
+                        <DropdownItem>Call now</DropdownItem>
+                        <DropdownItem>Change status</DropdownItem>
+                        <DropdownItem danger>Delete</DropdownItem>
+                      </CustomDropdown>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {filteredLeads.length === 0 && (
+            <div className="border-t border-border py-12 text-center">
+              <p className="text-[14px] text-ink-muted">No leads match your filters.</p>
+              <button type="button" onClick={clearFilters} className="mt-2 text-[13px] font-semibold text-[#3c0382] hover:underline">
+                Clear filters
               </button>
             </div>
-          </div>
+          )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-[13.5px]">
-              <thead>
-                <tr className="border-b border-border bg-surface-subtle text-[12px] font-semibold uppercase tracking-wide text-ink-hint">
-                  <th
-                    className="w-12 px-5 py-3 text-center"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <CustomCheckbox
-                      checked={allPageSelected || selectAllFiltered}
-                      indeterminate={somePageSelected && !selectAllFiltered}
-                      onCheckedChange={toggleSelectAllPage}
-                      aria-label="Select all on this page"
-                    />
-                  </th>
-                  <th className="px-3 py-3">Name</th>
-                  <th className="px-3 py-3">Phone</th>
-                  <th className="px-3 py-3">List</th>
-                  <th className="px-3 py-3">Status</th>
-                  <th className="px-3 py-3">Last call</th>
-                  <th className="px-3 py-3">Attempts</th>
-                  <th className="px-5 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {LEADS.map((lead) => {
-                  const isSelected =
-                    selectAllFiltered || selectedIds.has(lead.id);
-                  return (
-                    <tr
-                      key={lead.id}
-                      className={`border-b border-border/60 transition-colors last:border-0 hover:bg-accent-soft/30 ${
-                        isSelected ? "bg-accent-soft/50" : ""
-                      }`}
-                    >
-                      <td
-                        className="w-12 px-5 py-3.5 text-center"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <CustomCheckbox
-                          checked={isSelected}
-                          onCheckedChange={() => toggleLead(lead.id)}
-                          aria-label={`Select ${lead.name}`}
-                        />
-                      </td>
-                      <td className="px-3 py-3.5 font-medium text-ink">
-                        {lead.name}
-                      </td>
-                      <td className="px-3 py-3.5 font-mono text-[13px] text-ink-muted">
-                        {lead.phone}
-                      </td>
-                      <td className="px-3 py-3.5 text-ink-muted">{lead.list}</td>
-                      <td className="px-3 py-3.5">
-                        <Badge variant={statusVariant(lead.status)}>
-                          {lead.status}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-3.5 text-ink-muted">
-                        {lead.lastCall}
-                      </td>
-                      <td className="px-3 py-3.5 text-ink-muted">
-                        {lead.attempts}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <CustomDropdown
-                          align="right"
-                          menuWidth={180}
-                          trigger={
-                            <button
-                              type="button"
-                              className="rounded-lg p-1.5 text-ink-hint hover:bg-surface-muted hover:text-ink"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                          }
-                        >
-                          <DropdownItem>View details</DropdownItem>
-                          <DropdownItem>Call now</DropdownItem>
-                          <DropdownItem>Change status</DropdownItem>
-                          <DropdownItem danger>Delete</DropdownItem>
-                        </CustomDropdown>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-border px-5 py-3 text-[13px] text-ink-muted">
-            <span>
-              Showing 1–{LEADS.length} of {TOTAL_LEADS.toLocaleString()}
-            </span>
-            <div className="flex gap-1">
-              {["←", "1", "2", "3", "…", "→"].map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  className={`min-w-[32px] rounded-lg px-2 py-1 transition-colors ${
-                    p === "1"
-                      ? "bg-accent text-white"
-                      : "hover:bg-surface-muted"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalItems={TOTAL_LEADS}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            itemLabel="leads"
+          />
         </Card>
       </div>
 
@@ -353,21 +501,21 @@ export function LeadsView() {
             label: "Create Campaign",
             icon: <Megaphone className="h-3.5 w-3.5 shrink-0" />,
             onClick: () => undefined,
-            variant: "primary",
+            variant: "brand",
           },
           {
             id: "export",
             label: "Export CSV",
             icon: <Download className="h-3.5 w-3.5 shrink-0" />,
             onClick: () => undefined,
-            variant: "secondary",
+            variant: "emerald",
           },
           {
             id: "status",
             label: "Update Status",
             icon: <CircleDot className="h-3.5 w-3.5 shrink-0" />,
             onClick: () => undefined,
-            variant: "white",
+            variant: "violet",
           },
           {
             id: "delete",
@@ -378,16 +526,14 @@ export function LeadsView() {
           },
         ]}
         footer={
-          !selectAllFiltered &&
-          allPageSelected &&
-          TOTAL_LEADS > LEADS.length ? (
-            <div className="border-t border-blue-400/20 bg-blue-500/10 px-3 py-2 text-center sm:px-4">
-              <span className="text-xs text-blue-100">
+          !selectAllFiltered && allPageSelected && TOTAL_LEADS > LEADS.length ? (
+            <div className="border-t border-violet-200 bg-violet-50 px-4 py-2.5 text-center">
+              <span className="text-[12px] text-ink-muted">
                 All {LEADS.length} leads on this page are selected.{" "}
                 <button
                   type="button"
                   onClick={selectAllMatching}
-                  className="font-semibold text-white underline underline-offset-2 transition-colors hover:text-blue-50"
+                  className="font-semibold text-[#3c0382] underline underline-offset-2 hover:text-violet-700"
                 >
                   Select all {TOTAL_LEADS.toLocaleString()} matching leads
                 </button>

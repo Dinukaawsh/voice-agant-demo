@@ -1,18 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-export const BULK_ACTION_BTN =
-  "inline-flex h-9 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:flex-none";
-
-export type BulkActionVariant =
-  | "primary"
-  | "secondary"
-  | "danger"
-  | "neutral"
-  | "white";
+export type BulkActionVariant = "brand" | "secondary" | "danger" | "violet" | "emerald";
 
 export type BulkAction = {
   id: string;
@@ -25,15 +17,16 @@ export type BulkAction = {
 };
 
 const VARIANT_CLASS: Record<BulkActionVariant, string> = {
-  primary: "bg-accent text-white shadow-sm hover:bg-accent-hover",
+  brand:
+    "border-[#3c0382] bg-[#3c0382] text-white shadow-md shadow-[#3c0382]/20 hover:bg-[#4a0499]",
   secondary:
-    "border border-blue-400/35 bg-blue-500/15 text-blue-100 hover:bg-blue-500/25",
-  white:
-    "border border-white/20 bg-white/10 text-white hover:bg-white/15",
+    "border-border bg-white text-ink shadow-sm hover:border-[#3c0382]/30 hover:bg-violet-50/50",
+  violet:
+    "border-violet-600 bg-violet-200 text-violet-600 hover:bg-violet-300/80",
+  emerald:
+    "border-emerald-600 bg-emerald-200 text-emerald-600 hover:bg-emerald-300/80",
   danger:
-    "border border-red-400/40 bg-red-500/15 text-red-100 hover:bg-red-500/25",
-  neutral:
-    "border border-slate-500/60 bg-slate-800/80 text-slate-200 hover:bg-slate-700/90",
+    "border-red-600 bg-red-200 text-red-600 hover:bg-red-300/80",
 };
 
 type BulkSelectionActionBarProps = {
@@ -77,16 +70,21 @@ export function BulkSelectionActionBar({
     >
       <div
         className={cn(
-          "pointer-events-auto overflow-hidden rounded-2xl border border-blue-500/25",
-          "bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950",
-          "shadow-2xl shadow-slate-950/40 ring-1 ring-white/10",
+          "pointer-events-auto overflow-hidden rounded-2xl border border-[#3c0382]/15 bg-white/95 shadow-2xl shadow-violet-900/10 ring-1 ring-violet-100 backdrop-blur-xl",
           maxWidthClassName,
         )}
       >
+        <div className="h-1 bg-gradient-to-r from-violet-600 via-[#3c0382] to-indigo-600" />
+
         <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
-          <p className="min-w-0 text-center text-sm font-semibold text-blue-100 sm:text-left">
-            {selectedLabel}
-          </p>
+          <div className="flex min-w-0 items-center justify-center gap-3 sm:justify-start">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-violet-600 bg-violet-200 text-violet-600">
+              <Check className="h-4 w-4" strokeWidth={2.75} />
+            </div>
+            <p className="min-w-0 text-center text-[13.5px] font-semibold text-ink sm:text-left">
+              {selectedLabel}
+            </p>
+          </div>
 
           <div className="flex flex-wrap items-stretch justify-center gap-2 sm:justify-end">
             {visibleActions.map((action) => (
@@ -96,7 +94,7 @@ export function BulkSelectionActionBar({
                 onClick={action.onClick}
                 disabled={action.disabled}
                 className={cn(
-                  BULK_ACTION_BTN,
+                  "inline-flex h-9 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-xl border-2 px-3 text-[12px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:flex-none",
                   VARIANT_CLASS[action.variant ?? "secondary"],
                 )}
               >
@@ -108,10 +106,12 @@ export function BulkSelectionActionBar({
               type="button"
               onClick={onClear}
               disabled={clearDisabled}
-              className={cn(BULK_ACTION_BTN, VARIANT_CLASS.neutral)}
+              className={cn(
+                "inline-flex h-9 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-xl border-2 border-slate-600 bg-slate-200 px-3 text-[12px] font-semibold text-slate-600 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:flex-none",
+              )}
               aria-label="Clear selection and close"
             >
-              <X className="h-3.5 w-3.5 shrink-0" />
+              <X className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
               Cancel
             </button>
           </div>

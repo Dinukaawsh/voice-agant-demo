@@ -15,11 +15,11 @@ import {
   X,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CustomSelect } from "@/components/ui/CustomSelect";
-import { MetricIconBox } from "@/components/ui/MetricIconBox";
+import { MetricIconBox, MetricIconButton } from "@/components/ui/MetricIconBox";
 import { CampaignCreationModal } from "@/components/campaigns/CampaignCreationModal";
+import { CampaignStatusIndicator } from "@/components/campaigns/CampaignStatusIndicator";
 import type { NewCampaign } from "./CampaignCreationWizard";
 import { cn } from "@/lib/cn";
 
@@ -101,12 +101,6 @@ function progressGradient(status: string) {
   if (status === "Paused") return "from-slate-400 to-slate-500";
   if (status === "Draft") return "from-slate-300 to-slate-400";
   return "from-orange-500 via-rose-500 to-violet-500";
-}
-
-function statusVariant(status: string) {
-  if (status === "Running") return "green" as const;
-  if (status === "Paused") return "amber" as const;
-  return "default" as const;
 }
 
 export function CampaignsView() {
@@ -417,7 +411,7 @@ export function CampaignsView() {
                     {/* Status */}
                     <div>
                       <span className="mr-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-hint lg:hidden">Status · </span>
-                      <Badge variant={statusVariant(c.status)}>{c.status}</Badge>
+                      <CampaignStatusIndicator status={c.status} />
                     </div>
 
                     {/* Progress */}
@@ -460,30 +454,13 @@ export function CampaignsView() {
                     </p>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-end gap-1 lg:opacity-70 lg:transition-opacity lg:group-hover:opacity-100">
+                    <div className="flex items-center justify-end gap-1.5 lg:opacity-70 lg:transition-opacity lg:group-hover:opacity-100">
                       {c.status === "Running" ? (
-                        <button
-                          type="button"
-                          className="rounded-xl border border-border bg-white p-2 text-ink-muted shadow-sm transition-colors hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700"
-                          title="Pause"
-                        >
-                          <Pause className="h-3.5 w-3.5" />
-                        </button>
+                        <MetricIconButton icon={Pause} tone="amber" label="Pause campaign" />
                       ) : c.status === "Paused" ? (
-                        <button
-                          type="button"
-                          className="rounded-xl border border-emerald-200 bg-emerald-50 p-2 text-emerald-700 shadow-sm transition-colors hover:bg-emerald-100"
-                          title="Resume"
-                        >
-                          <Play className="h-3.5 w-3.5" />
-                        </button>
+                        <MetricIconButton icon={Play} tone="emerald" label="Resume campaign" />
                       ) : null}
-                      <button
-                        type="button"
-                        className="rounded-xl border border-transparent p-2 text-ink-hint transition-colors hover:border-border hover:bg-white hover:text-ink"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                      <MetricIconButton icon={MoreHorizontal} tone="slate" label="More options" />
                     </div>
                   </div>
                 </div>
