@@ -6,6 +6,7 @@ import {
   Bot,
   Check,
   ChevronDown,
+  ClipboardList,
   FileAudio,
   GitBranch,
   ListOrdered,
@@ -16,6 +17,7 @@ import {
   Shuffle,
   SlidersHorizontal,
   Sparkles,
+  Trash2,
   Upload,
   Building2,
   Coffee,
@@ -36,7 +38,8 @@ const STEPS = [
   { id: 5, label: "Success", desc: "Closing recording", icon: Sparkles },
   { id: 6, label: "Edge cases", desc: "Objections & exits", icon: GitBranch },
   { id: 7, label: "Variations", desc: "Natural variety", icon: Shuffle },
-  { id: 8, label: "Settings", desc: "Ambience & context", icon: SlidersHorizontal },
+  { id: 8, label: "Extraction", desc: "Fields captured", icon: ClipboardList },
+  { id: 9, label: "Settings", desc: "Ambience & context", icon: SlidersHorizontal },
 ] as const;
 
 /** Per-step icon colours — idle: white bg + coloured border/icon; active: filled + white icon */
@@ -84,6 +87,12 @@ const STEP_ICON_STYLES = [
     label: "text-fuchsia-600",
   },
   {
+    idle: "border-rose-500 text-rose-600",
+    active: "border-rose-500 bg-rose-500 text-white",
+    hover: "group-hover/step:border-rose-500 group-hover/step:bg-rose-500 group-hover/step:text-white",
+    label: "text-rose-600",
+  },
+  {
     idle: "border-indigo-500 text-indigo-600",
     active: "border-indigo-500 bg-indigo-500 text-white",
     hover: "group-hover/step:border-indigo-500 group-hover/step:bg-indigo-500 group-hover/step:text-white",
@@ -115,6 +124,29 @@ const VARIATION_OPTIONS = [
   { value: "question_2", label: "Question 2" },
   { value: "eligibility", label: "Eligibility" },
   { value: "success", label: "Success" },
+];
+
+const EXTRACTION_TYPE_OPTIONS = [
+  { value: "text", label: "Text" },
+  { value: "number", label: "Number" },
+  { value: "date", label: "Date" },
+  { value: "boolean", label: "Yes / No" },
+  { value: "longtext", label: "Long text" },
+];
+
+type ExtractionFieldDraft = {
+  id: string;
+  label: string;
+  type: string;
+  description: string;
+};
+
+const DEFAULT_EXTRACTION_FIELDS: ExtractionFieldDraft[] = [
+  { id: "f1", label: "Full name", type: "text", description: "The lead's full name as confirmed on the call." },
+  { id: "f2", label: "Date of birth", type: "date", description: "Used to check age eligibility." },
+  { id: "f3", label: "Current monthly premium", type: "number", description: "What the lead currently pays per month." },
+  { id: "f4", label: "Interested", type: "boolean", description: "Whether the lead agreed to a comparison." },
+  { id: "f5", label: "Call summary", type: "longtext", description: "One-paragraph summary of the whole call." },
 ];
 
 const inputClass =
@@ -564,13 +596,33 @@ export function AgentCreationWizard({
   const [ambience, setAmbience] = useState("Office ambience");
   const [volume, setVolume] = useState(10);
   const [q2Open, setQ2Open] = useState(false);
+  const [extractionFields, setExtractionFields] = useState<ExtractionFieldDraft[]>(
+    DEFAULT_EXTRACTION_FIELDS,
+  );
+
+  function updateField(id: string, patch: Partial<ExtractionFieldDraft>) {
+    setExtractionFields((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, ...patch } : f)),
+    );
+  }
+
+  function addField() {
+    setExtractionFields((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), label: "", type: "text", description: "" },
+    ]);
+  }
+
+  function removeField(id: string) {
+    setExtractionFields((prev) => prev.filter((f) => f.id !== id));
+  }
 
   function goTo(s: number) {
-    setStep(Math.min(8, Math.max(1, s)));
+    setStep(Math.min(9, Math.max(1, s)));
   }
 
   function handleNext() {
-    if (step < 8) goTo(step + 1);
+    if (step < 9) goTo(step + 1);
     else {
       onComplete?.({
         name: name.trim() || "Untitled agent",
@@ -783,6 +835,87 @@ export function AgentCreationWizard({
 
       {step === 8 && (
         <>
+          <div className="relative overflow-hidden rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-5">
+            <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-rose-300/20 blur-2xl" />
+            <div className="relative flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-rose-500 bg-white text-rose-600 shadow-sm">
+                <ClipboardList className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-semibold text-ink">Extraction fields</h3>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">
+                  The data the agent captures at the end of every call. These fields
+                  form the call summary and are what gets exported to your CRM.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-soft">
+            <div className="h-1 bg-gradient-to-r from-rose-500 to-orange-500" />
+            <div className="space-y-3 p-5">
+              {extractionFields.map((field, i) => (
+                <div
+                  key={field.id}
+                  className="rounded-2xl border border-border bg-surface-subtle/60 p-3.5"
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 text-[11px] font-bold text-rose-700">
+                      {i + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeField(field.id)}
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-hint transition-colors hover:bg-red-50 hover:text-red-600"
+                      aria-label="Remove field"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <div className="grid gap-2.5 sm:grid-cols-[1fr_150px]">
+                    <input
+                      type="text"
+                      value={field.label}
+                      onChange={(e) => updateField(field.id, { label: e.target.value })}
+                      placeholder="Field name (e.g. Date of birth)"
+                      className={inputClass}
+                    />
+                    <CustomSelect
+                      value={field.type}
+                      onChange={(v) => updateField(field.id, { type: v })}
+                      options={EXTRACTION_TYPE_OPTIONS}
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    value={field.description}
+                    onChange={(e) => updateField(field.id, { description: e.target.value })}
+                    placeholder="Description — tells the agent what to capture (required)"
+                    className={cn(inputClass, "mt-2.5")}
+                  />
+                  {!field.description.trim() && (
+                    <p className="mt-1.5 text-[11.5px] font-medium text-amber-600">
+                      A description is required before you can save this field.
+                    </p>
+                  )}
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addField}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-rose-300/80 bg-rose-50/50 py-2.5 text-[12.5px] font-semibold text-rose-700 transition-colors hover:border-rose-500 hover:bg-rose-50"
+              >
+                <Plus className="h-4 w-4" />
+                Add extraction field
+              </button>
+            </div>
+          </section>
+        </>
+      )}
+
+      {step === 9 && (
+        <>
           <div className="relative overflow-hidden rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-5">
             <div className="pointer-events-none absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-indigo-300/20 blur-2xl" />
             <div className="relative flex items-start gap-3">
@@ -829,7 +962,7 @@ export function AgentCreationWizard({
             <p className="text-[13px] font-semibold text-ink">Ready to create</p>
             <p className="mt-1 text-[12px] text-ink-muted">
               <span className="font-medium text-ink">{name || "Untitled agent"}</span> ·{" "}
-              {LANGUAGE_LABELS[language]} · 8 steps complete
+              {LANGUAGE_LABELS[language]} · {extractionFields.length} extraction fields
             </p>
           </div>
         </>
@@ -853,8 +986,8 @@ export function AgentCreationWizard({
             Cancel
           </Button>
           <Button color="brand" className="w-full gap-2" onClick={handleNext}>
-            {step === 8 ? "Create agent" : "Next"}
-            {step < 8 && <ArrowRight className="h-4 w-4" />}
+            {step === 9 ? "Create agent" : "Next"}
+            {step < 9 && <ArrowRight className="h-4 w-4" />}
           </Button>
         </div>
       </div>

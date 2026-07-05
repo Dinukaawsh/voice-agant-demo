@@ -27,7 +27,7 @@ export function AgentCreationModal({
         <div className="border-t border-blue-100/80 bg-gradient-to-r from-blue-50 via-indigo-50/80 to-violet-50 px-5 py-2.5 sm:px-6">
           <div className="flex items-center gap-2 text-[12px] font-medium text-blue-800">
             <Sparkles className="h-3.5 w-3.5 text-violet-600" />
-            Guided setup · 8 steps · ~5 min
+            Guided setup · 9 steps · ~5 min
           </div>
         </div>
       }

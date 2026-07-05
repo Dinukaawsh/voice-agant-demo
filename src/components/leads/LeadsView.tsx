@@ -38,6 +38,8 @@ import {
   ImportLeadsModal,
   type NewLeadList,
 } from "@/components/leads/ImportLeadsModal";
+import { LeadCallDetail, buildLeadCall } from "@/components/leads/LeadCallDetail";
+import { Modal } from "@/components/ui/Modal";
 import { cn } from "@/lib/cn";
 
 const TOTAL_LEADS = 6950;
@@ -312,6 +314,7 @@ export function LeadsView() {
   const [leads, setLeads] = useState<LeadRow[]>(INITIAL_LEADS);
   const [leadLists, setLeadLists] = useState<LeadList[]>(LEAD_LISTS);
   const [importOpen, setImportOpen] = useState(false);
+  const [detailLead, setDetailLead] = useState<LeadRow | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectAllFiltered, setSelectAllFiltered] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -667,8 +670,9 @@ export function LeadsView() {
               return (
                 <div
                   key={lead.id}
+                  onClick={() => setDetailLead(lead)}
                   className={cn(
-                    "group border-l-[3px] px-4 py-4 transition-colors sm:px-5",
+                    "group cursor-pointer border-l-[3px] px-4 py-4 transition-colors sm:px-5",
                     leadStatusAccent(lead.status),
                     isSelected
                       ? "bg-violet-50/60 hover:bg-violet-50/80"
@@ -867,6 +871,30 @@ export function LeadsView() {
         onClose={() => setImportOpen(false)}
         onImport={handleImportList}
       />
+
+      <Modal
+        open={detailLead !== null}
+        onClose={() => setDetailLead(null)}
+        size="2xl"
+        title={detailLead?.name ?? "Lead"}
+        subtitle={
+          detailLead ? `${detailLead.phone} · ${detailLead.list}` : undefined
+        }
+      >
+        {detailLead && (
+          <LeadCallDetail
+            call={buildLeadCall({
+              name: detailLead.name,
+              phone: detailLead.phone,
+              status: detailLead.status,
+              campaign: detailLead.list,
+              outcome: detailLead.status,
+              attempts: detailLead.attempts,
+              date: detailLead.lastCall,
+            })}
+          />
+        )}
+      </Modal>
     </>
   );
 }

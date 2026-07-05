@@ -155,7 +155,7 @@ export function Sidebar({
               Sign out
             </span>
           )}
-        </button>
+         </button>
       </div>
     </aside>
   );
