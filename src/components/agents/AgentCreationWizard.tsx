@@ -9,6 +9,7 @@ import {
   ClipboardList,
   FileAudio,
   GitBranch,
+  Lightbulb,
   ListOrdered,
   Mic2,
   Play,
@@ -168,6 +169,24 @@ function FormField({
       <label className="block text-[13px] font-semibold text-ink">{label}</label>
       {children}
       {hint && <p className="text-[12px] leading-relaxed text-ink-hint">{hint}</p>}
+    </div>
+  );
+}
+
+function StepGuide({ text, example }: { text: string; example?: string }) {
+  return (
+    <div className="flex items-start gap-2.5 rounded-xl border border-blue-200/70 bg-blue-50/50 p-3.5">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+        <Lightbulb className="h-3.5 w-3.5" />
+      </span>
+      <div className="space-y-0.5">
+        <p className="text-[12.5px] leading-relaxed text-ink-muted">{text}</p>
+        {example && (
+          <p className="text-[12px] leading-relaxed text-ink-hint">
+            <span className="font-semibold text-ink">Example:</span> {example}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -635,6 +654,11 @@ export function AgentCreationWizard({
   const stepContent = (
     <div key={step} className="wizard-step-enter space-y-4">
       {step === 1 && (
+        <>
+        <StepGuide
+          text="Name this agent and choose the language it speaks. This is just for your team — leads never see it."
+          example="&ldquo;Health insurance FR - July&rdquo;, language French"
+        />
         <SectionCard
           title="Agent details"
           desc="Basic information about this calling agent."
@@ -650,9 +674,15 @@ export function AgentCreationWizard({
             <TextInput placeholder="Qualifies leads for health insurance offers" />
           </FormField>
         </SectionCard>
+        </>
       )}
 
       {step === 2 && (
+        <>
+        <StepGuide
+          text="Upload the greeting clips that play at the very start of the call, in order, before any question. Keep them short and warm."
+          example="&ldquo;Bonjour, je suis Julie de MutuelleCompare, vous avez deux minutes ?&rdquo;"
+        />
         <SectionCard
           title="Opening recordings"
           desc="These play in order at the start of every call, before the first question."
@@ -663,10 +693,15 @@ export function AgentCreationWizard({
           </div>
           <UploadZone label="Add opening recording" hint="Plays after the previous opening" />
         </SectionCard>
+        </>
       )}
 
       {step === 3 && (
         <>
+          <StepGuide
+            text="Record one clip for each question you use to qualify the lead. Add them in the order they should be asked, and set how the answer is captured."
+            example="&ldquo;Quel type d&rsquo;assurance recherchez-vous ?&rdquo;"
+          />
           <SectionCard title="Question 1" desc="First qualification question in the call flow." accent="violet">
             <Badge variant="green">Recording uploaded</Badge>
             <RecordingRow name="question_1_type_assurance.mp3" />
@@ -709,6 +744,11 @@ export function AgentCreationWizard({
       )}
 
       {step === 4 && (
+        <>
+        <StepGuide
+          text="Upload the message that plays the moment a lead answers everything and qualifies. It should confirm the good news."
+          example="&ldquo;Bonne nouvelle, vous êtes éligible à notre comparatif gratuit&hellip;&rdquo;"
+        />
         <SectionCard
           title="Eligibility recording"
           desc="Plays once the lead has answered every question and qualifies."
@@ -716,9 +756,15 @@ export function AgentCreationWizard({
         >
           <UploadZone label="Upload eligibility recording" hint="e.g. confirmation they qualify for an offer" />
         </SectionCard>
+        </>
       )}
 
       {step === 5 && (
+        <>
+        <StepGuide
+          text="Upload the closing line that plays last. It cannot be interrupted, and the call ends when it finishes."
+          example="&ldquo;Merci, un conseiller vous recontactera très bientôt. Bonne journée !&rdquo;"
+        />
         <SectionCard
           title="Success recording"
           desc="Final message after eligibility. Cannot be interrupted — call ends when it finishes."
@@ -726,10 +772,15 @@ export function AgentCreationWizard({
         >
           <RecordingRow name="success_merci.mp3" />
         </SectionCard>
+        </>
       )}
 
       {step === 6 && (
         <>
+          <StepGuide
+            text="Upload short replies for common objections, polite goodbyes when a lead declines, and a nudge for when they go quiet. All optional, but they make calls feel human."
+            example="Objection &ldquo;Qui êtes-vous ?&rdquo; &rarr; &ldquo;Je vous appelle de la part de&hellip;&rdquo;"
+          />
           <SectionCard
             title="Question edge cases"
             desc='Objection answers tied to a specific question — e.g. "who are you?"'
@@ -762,6 +813,10 @@ export function AgentCreationWizard({
 
       {step === 7 && (
         <div className="space-y-4">
+          <StepGuide
+            text="Upload alternate takes of clips you already added, so the agent never sounds repetitive when it has to say the same thing twice."
+            example="Two different recordings of Question 1, phrased slightly differently."
+          />
           <div className="relative overflow-hidden rounded-2xl border border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 via-violet-50 to-indigo-50 p-5">
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-fuchsia-300/20 blur-2xl" />
             <div className="relative flex items-start gap-3">
@@ -835,6 +890,10 @@ export function AgentCreationWizard({
 
       {step === 8 && (
         <>
+          <StepGuide
+            text="No recordings here — just list the details you want back from every call. Give each one a clear name and a short description so the agent knows what to capture."
+            example="Full name, date of birth, current monthly premium, interested (yes/no)."
+          />
           <div className="relative overflow-hidden rounded-2xl border border-rose-200/80 bg-gradient-to-br from-rose-50 via-white to-orange-50 p-5">
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-rose-300/20 blur-2xl" />
             <div className="relative flex items-start gap-3">
@@ -916,6 +975,10 @@ export function AgentCreationWizard({
 
       {step === 9 && (
         <>
+          <StepGuide
+            text="Add a soft background sound so calls feel like a real office, and give the agent some context about your business to handle objections naturally."
+            example="Office ambience + &ldquo;We are a French health insurance broker&hellip;&rdquo;"
+          />
           <div className="relative overflow-hidden rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-5">
             <div className="pointer-events-none absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-indigo-300/20 blur-2xl" />
             <div className="relative flex items-start gap-3">
