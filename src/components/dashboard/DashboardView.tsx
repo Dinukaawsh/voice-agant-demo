@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   ArrowUpRight,
   Bot,
@@ -9,12 +10,15 @@ import {
   Headset,
   Megaphone,
   PhoneCall,
+  Plus,
   Sparkles,
   TrendingUp,
   Users,
+  Wallet,
   Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { AddBalanceModal } from "@/components/billing/AddBalanceModal";
 import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
 import { cn } from "@/lib/cn";
 
@@ -187,10 +191,16 @@ function buildAreaPath(data: typeof CALL_VOLUME, height: number, width: number) 
   return { line, area, points };
 }
 
+const AVG_DAILY_SPEND = 161.3;
+
 export function DashboardView() {
   const maxCalls = Math.max(...CALL_VOLUME.map((d) => d.calls));
   const chart = buildAreaPath(CALL_VOLUME, 160, 400);
   const conversionRate = Math.round((412 / 1847) * 100);
+
+  const [balance, setBalance] = useState(1240.6);
+  const [addOpen, setAddOpen] = useState(false);
+  const runwayDays = Math.floor(balance / AVG_DAILY_SPEND);
 
   return (
     <div className="animate-fade-up space-y-6 p-5 lg:p-8">
@@ -209,7 +219,7 @@ export function DashboardView() {
               Platform live · 14 employees on calls
             </div>
             <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Good morning, Admin
+              Good morning, Nathan
             </h2>
             <p className="mt-2 max-w-lg text-[14px] leading-relaxed text-ink-muted">
               Your voice agents placed{" "}
@@ -218,24 +228,57 @@ export function DashboardView() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/campaigns"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-blue-500/25 transition-transform hover:scale-[1.02]"
-            >
-              <Megaphone className="h-4 w-4" />
-              View campaigns
-            </Link>
-            <Link
-              href="/agents"
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-white/80 px-4 py-2.5 text-[13px] font-semibold text-ink shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
-            >
-              <Bot className="h-4 w-4 text-violet-600" />
-              Manage agents
-            </Link>
+          <div className="flex flex-col items-stretch gap-3 sm:min-w-[260px]">
+            {/* Billing balance */}
+            <div className="rounded-2xl border border-emerald-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wide text-ink-hint">
+                  <Wallet className="h-4 w-4 text-emerald-600" />
+                  Balance
+                </span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                  ~{runwayDays} days left
+                </span>
+              </div>
+              <p className="mt-1.5 text-2xl font-bold tabular-nums tracking-tight text-ink">
+                ${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </p>
+              <button
+                type="button"
+                onClick={() => setAddOpen(true)}
+                className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#3c0382] to-violet-600 px-4 py-2 text-[13px] font-semibold text-white shadow-md shadow-[#3c0382]/20 transition-transform hover:scale-[1.02]"
+              >
+                <Plus className="h-4 w-4" />
+                Add balance
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/campaigns"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-blue-500/25 transition-transform hover:scale-[1.02]"
+              >
+                <Megaphone className="h-4 w-4" />
+                Campaigns
+              </Link>
+              <Link
+                href="/agents"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-white/80 px-4 py-2.5 text-[13px] font-semibold text-ink shadow-sm backdrop-blur-sm transition-colors hover:bg-white"
+              >
+                <Bot className="h-4 w-4 text-violet-600" />
+                Agents
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      <AddBalanceModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        currentBalance={balance}
+        onAdd={(amt) => setBalance((b) => b + amt)}
+      />
 
       {/* Stats */}
       <MetricStatGrid>

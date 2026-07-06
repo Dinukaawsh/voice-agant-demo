@@ -155,11 +155,11 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
                 className="group flex items-center gap-2 rounded-full border border-border/80 bg-white py-1 pl-1 pr-2.5 shadow-sm transition-all hover:border-[#3c0382]/25 hover:shadow-md sm:gap-2.5 sm:pr-3"
               >
                 <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3c0382] to-violet-500 text-[11px] font-bold text-white ring-2 ring-violet-100 transition-all group-hover:ring-[#3c0382]/20">
-                  TD
+                  NC
                   <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
                 </div>
                 <div className="hidden text-left sm:block">
-                  <p className="text-[13px] font-semibold leading-tight text-ink">Admin</p>
+                  <p className="text-[13px] font-semibold leading-tight text-ink">Nathan Cole</p>
                   <p className="text-[11px] text-ink-hint">Twist Digital</p>
                 </div>
                 <ChevronDown className="hidden h-3.5 w-3.5 text-ink-hint transition-transform group-hover:text-[#3c0382] sm:block" />

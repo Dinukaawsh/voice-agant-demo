@@ -150,6 +150,42 @@ const DEFAULT_EXTRACTION_FIELDS: ExtractionFieldDraft[] = [
   { id: "f5", label: "Call summary", type: "longtext", description: "One-paragraph summary of the whole call." },
 ];
 
+type OpeningPart = {
+  id: string;
+  label: string;
+  explanation: string;
+  example?: string;
+  file: string | null;
+};
+
+const DEFAULT_OPENINGS: OpeningPart[] = [
+  {
+    id: "o1",
+    label: "Opening 1",
+    explanation:
+      "The very first thing the lead hears when they pick up — a warm greeting and who is calling. Keep it short and friendly.",
+    example: "“Bonjour, je suis Julie de MutuelleCompare.”",
+    file: "opening_1_bonjour.mp3",
+  },
+  {
+    id: "o2",
+    label: "Opening 2",
+    explanation:
+      "Say why you’re calling and set a light expectation, so the lead understands the reason before the first question.",
+    example:
+      "“Je vous appelle au sujet de votre mutuelle santé, vous avez deux minutes ?”",
+    file: "opening_2_presentation.mp3",
+  },
+  {
+    id: "o3",
+    label: "Opening 3",
+    explanation:
+      "An optional bridge line that leads naturally into your first qualification question.",
+    example: "“Parfait, juste quelques questions rapides pour vous aider.”",
+    file: null,
+  },
+];
+
 const inputClass =
   "w-full rounded-xl border border-border bg-white px-3.5 py-2.5 text-sm text-ink shadow-sm outline-none transition-all placeholder:text-ink-hint focus:border-accent focus:ring-4 focus:ring-accent/10";
 
@@ -625,6 +661,28 @@ export function AgentCreationWizard({
   const [extractionFields, setExtractionFields] = useState<ExtractionFieldDraft[]>(
     DEFAULT_EXTRACTION_FIELDS,
   );
+  const [openings, setOpenings] = useState<OpeningPart[]>(DEFAULT_OPENINGS);
+
+  function addOpening() {
+    setOpenings((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        label: `Opening ${prev.length + 1}`,
+        explanation: "Another line that plays right after the previous opening part.",
+        example: "",
+        file: null,
+      },
+    ]);
+  }
+
+  function removeOpening(id: string) {
+    setOpenings((prev) =>
+      prev
+        .filter((o) => o.id !== id)
+        .map((o, i) => ({ ...o, label: `Opening ${i + 1}` })),
+    );
+  }
 
   function updateField(id: string, patch: Partial<ExtractionFieldDraft>) {
     setExtractionFields((prev) =>
@@ -687,19 +745,56 @@ export function AgentCreationWizard({
       {step === 2 && (
         <>
         <StepGuide
-          text="Upload the greeting clips that play at the very start of the call, in order, before any question. Keep them short and warm."
-          example="&ldquo;Bonjour, je suis Julie de MutuelleCompare, vous avez deux minutes ?&rdquo;"
+          text="Your opening is what the lead hears first, split into short parts that play back-to-back. Add a recording for each part in order — Opening 1, then 2, then 3."
         />
-        <SectionCard
-          title="Opening recordings"
-          desc="These play in order at the start of every call, before the first question."
+        {openings.map((op, i) => (
+          <SectionCard
+            key={op.id}
+            title={op.label}
+            desc={op.explanation}
+            accent={i === 0 ? "violet" : "blue"}
+            optional={i >= 2}
+          >
+            {op.example && (
+              <p className="text-[12px] leading-relaxed text-ink-hint">
+                <span className="font-semibold text-ink">Example:</span> {op.example}
+              </p>
+            )}
+
+            {op.file ? (
+              <>
+                <Badge variant="green">Recording uploaded</Badge>
+                <RecordingRow name={op.file} tag={op.label} />
+                <UploadZone label={`Replace ${op.label} recording`} />
+              </>
+            ) : (
+              <UploadZone
+                label={`Upload ${op.label} recording`}
+                hint="Plays right after the previous opening part"
+              />
+            )}
+
+            {openings.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeOpening(op.id)}
+                className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-ink-hint transition-colors hover:text-red-600"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Remove {op.label}
+              </button>
+            )}
+          </SectionCard>
+        ))}
+
+        <button
+          type="button"
+          onClick={addOpening}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-violet-300/80 bg-violet-50/50 py-3 text-[13px] font-semibold text-violet-700 transition-colors hover:border-violet-500 hover:bg-violet-50"
         >
-          <div className="space-y-2">
-            <RecordingRow name="opening_1_bonjour.mp3" tag="Opening 1" />
-            <RecordingRow name="opening_2_presentation.mp3" tag="Opening 2" />
-          </div>
-          <UploadZone label="Add opening recording" hint="Plays after the previous opening" />
-        </SectionCard>
+          <Plus className="h-4 w-4" />
+          Add another opening part
+        </button>
         </>
       )}
 

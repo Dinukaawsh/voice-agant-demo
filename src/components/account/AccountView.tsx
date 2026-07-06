@@ -17,9 +17,9 @@ import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
 import { cn } from "@/lib/cn";
 
 const PROFILE = {
-  name: "Admin",
+  name: "Nathan Cole",
   role: "Organization owner",
-  email: "admin@twist-digital.com",
+  email: "nathan@twist-digital.com",
   phone: "+33 145 678 901",
   timezone: "Europe/Paris (CET)",
   language: "English",
@@ -45,7 +45,7 @@ const PLAN = {
 };
 
 const TEAM = [
-  { id: "1", name: "Admin", email: "admin@twist-digital.com", role: "Owner", status: "Active" },
+  { id: "1", name: "Nathan Cole", email: "nathan@twist-digital.com", role: "Owner", status: "Active" },
   { id: "2", name: "Camille Fournier", email: "camille@twist-digital.com", role: "Manager", status: "Active" },
   { id: "3", name: "Lucas Girard", email: "lucas@twist-digital.com", role: "Agent", status: "Active" },
   { id: "4", name: "Emma Rousseau", email: "emma@twist-digital.com", role: "Agent", status: "Invited" },
