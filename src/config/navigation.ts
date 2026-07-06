@@ -7,6 +7,7 @@ import {
   Headset,
   ClipboardCheck,
   CreditCard,
+  Plug,
   UserCog,
 } from "lucide-react";
 
@@ -84,6 +85,15 @@ export const NAV_ITEMS: NavItem[] = [
     iconIdle:
       "border-amber-500 bg-white text-amber-600 group-hover/item:bg-amber-500 group-hover/item:text-white",
     iconActive: "border-amber-500 bg-amber-500 text-white",
+  },
+  {
+    label: "Connections",
+    href: "/connections",
+    icon: Plug,
+    description: "Connect your CRMs and tools via API & webhooks",
+    iconIdle:
+      "border-teal-500 bg-white text-teal-600 group-hover/item:bg-teal-500 group-hover/item:text-white",
+    iconActive: "border-teal-500 bg-teal-500 text-white",
   },
   {
     label: "Account",

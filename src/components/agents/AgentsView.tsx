@@ -5,6 +5,7 @@ import {
   Bot,
   Filter,
   MoreHorizontal,
+  Pencil,
   PhoneCall,
   Plus,
   Target,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AgentCreationModal } from "@/components/agents/AgentCreationModal";
+import { AgentEditModal } from "@/components/agents/AgentEditModal";
 import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { MetricStatCard, MetricStatGrid } from "@/components/ui/MetricStatCard";
@@ -187,6 +189,7 @@ function AgentDetailItem({ label, value }: { label: string; value: string }) {
 
 export function AgentsView() {
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingAgent, setEditingAgent] = useState<AgentRow | null>(null);
   const [agents, setAgents] = useState<AgentRow[]>(INITIAL_AGENTS);
   const [activeId, setActiveId] = useState(INITIAL_AGENTS[0]?.id);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -258,6 +261,18 @@ export function AgentsView() {
       ...prev,
     ]);
     setActiveId(id);
+  }
+
+  function handleSaveEdit(updated: { name: string; language: string }) {
+    if (!editingAgent) return;
+    setAgents((prev) =>
+      prev.map((a) =>
+        a.id === editingAgent.id
+          ? { ...a, name: updated.name, language: updated.language }
+          : a,
+      ),
+    );
+    setEditingAgent(null);
   }
 
   const statCards = [
@@ -433,25 +448,38 @@ export function AgentsView() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="truncate text-[15px] font-semibold text-ink">{agent.name}</p>
-                        <CustomDropdown
-                          align="right"
-                          menuWidth={176}
-                          trigger={
-                            <button
-                              type="button"
-                              onClick={(e) => e.stopPropagation()}
-                              className="ml-auto shrink-0 rounded-lg p-1.5 text-ink-hint opacity-0 transition-all hover:bg-surface-muted hover:text-ink group-hover:opacity-100 sm:ml-0"
-                              aria-label="More options"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                          }
-                        >
-                          <DropdownItem>Edit agent</DropdownItem>
-                          <DropdownItem>Clone</DropdownItem>
-                          <DropdownItem>Test call</DropdownItem>
-                          <DropdownItem danger>Archive</DropdownItem>
-                        </CustomDropdown>
+                        <div className="ml-auto flex shrink-0 items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingAgent(agent);
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted shadow-sm transition-colors hover:border-accent/40 hover:bg-accent-soft/40 hover:text-accent"
+                            aria-label="Edit agent"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Edit</span>
+                          </button>
+                          <CustomDropdown
+                            align="right"
+                            menuWidth={176}
+                            trigger={
+                              <button
+                                type="button"
+                                className="shrink-0 rounded-lg p-1.5 text-ink-hint opacity-0 transition-all hover:bg-surface-muted hover:text-ink group-hover:opacity-100"
+                                aria-label="More options"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </button>
+                            }
+                          >
+                            <DropdownItem onClick={() => setEditingAgent(agent)}>Edit agent</DropdownItem>
+                            <DropdownItem>Clone</DropdownItem>
+                            <DropdownItem>Test call</DropdownItem>
+                            <DropdownItem danger>Archive</DropdownItem>
+                          </CustomDropdown>
+                        </div>
                       </div>
 
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-muted">
@@ -497,6 +525,11 @@ export function AgentsView() {
       </div>
 
       <AgentCreationModal open={createOpen} onClose={() => setCreateOpen(false)} onCreate={handleCreateAgent} />
+      <AgentEditModal
+        agent={editingAgent}
+        onClose={() => setEditingAgent(null)}
+        onSave={handleSaveEdit}
+      />
     </>
   );
 }

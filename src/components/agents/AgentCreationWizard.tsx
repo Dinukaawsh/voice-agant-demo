@@ -601,13 +601,20 @@ const LANGUAGE_LABELS: Record<string, string> = {
 export function AgentCreationWizard({
   onClose,
   onComplete,
+  mode = "create",
+  initialName,
+  initialLanguage,
 }: {
   onClose?: () => void;
   onComplete?: (agent: NewAgent) => void;
+  mode?: "create" | "edit";
+  initialName?: string;
+  initialLanguage?: string;
 }) {
+  const isEdit = mode === "edit";
   const [step, setStep] = useState(1);
-  const [name, setName] = useState("Health insurance FR - July");
-  const [language, setLanguage] = useState("fr");
+  const [name, setName] = useState(initialName ?? "Health insurance FR - July");
+  const [language, setLanguage] = useState(initialLanguage ?? "fr");
   const [exitRecording, setExitRecording] = useState("exit_billing");
   const [edgeQuestion, setEdgeQuestion] = useState("q1");
   const [variationOf, setVariationOf] = useState("");
@@ -1022,7 +1029,9 @@ export function AgentCreationWizard({
           </SectionCard>
 
           <div className="rounded-2xl border border-accent/20 bg-gradient-to-br from-accent-soft to-violet-50 p-4">
-            <p className="text-[13px] font-semibold text-ink">Ready to create</p>
+            <p className="text-[13px] font-semibold text-ink">
+              {isEdit ? "Ready to save changes" : "Ready to create"}
+            </p>
             <p className="mt-1 text-[12px] text-ink-muted">
               <span className="font-medium text-ink">{name || "Untitled agent"}</span> ·{" "}
               {LANGUAGE_LABELS[language]} · {extractionFields.length} extraction fields
@@ -1049,7 +1058,7 @@ export function AgentCreationWizard({
             Cancel
           </Button>
           <Button color="brand" className="w-full gap-2" onClick={handleNext}>
-            {step === 9 ? "Create agent" : "Next"}
+            {step === 9 ? (isEdit ? "Save changes" : "Create agent") : "Next"}
             {step < 9 && <ArrowRight className="h-4 w-4" />}
           </Button>
         </div>
