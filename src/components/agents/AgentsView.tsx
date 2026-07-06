@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ComponentProps } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   Bot,
   Filter,
@@ -9,6 +10,7 @@ import {
   PhoneCall,
   Plus,
   Target,
+  Trash2,
   TrendingUp,
   X,
   Zap,
@@ -187,6 +189,37 @@ function AgentDetailItem({ label, value }: { label: string; value: string }) {
   );
 }
 
+function AgentIconAction({
+  icon: Icon,
+  label,
+  onClick,
+  iconClassName,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onClick?: ComponentProps<"button">["onClick"];
+  iconClassName?: string;
+}) {
+  return (
+    <div className="group/tip relative inline-flex">
+      <button
+        type="button"
+        aria-label={label}
+        onClick={onClick}
+        className="flex h-9 w-9 shrink-0 items-center justify-center transition-opacity hover:opacity-70"
+      >
+        <Icon className={cn("h-4 w-4", iconClassName)} strokeWidth={2.25} />
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100"
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
 export function AgentsView() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentRow | null>(null);
@@ -273,6 +306,15 @@ export function AgentsView() {
       ),
     );
     setEditingAgent(null);
+  }
+
+  function deleteAgent(id: string) {
+    setAgents((prev) => {
+      const next = prev.filter((a) => a.id !== id);
+      setActiveId((current) => (current === id ? next[0]?.id : current));
+      return next;
+    });
+    setEditingAgent((current) => (current?.id === id ? null : current));
   }
 
   const statCards = [
@@ -446,41 +488,7 @@ export function AgentsView() {
                     <AgentInitials name={agent.name} id={agent.id} status={agent.status} />
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="truncate text-[15px] font-semibold text-ink">{agent.name}</p>
-                        <div className="ml-auto flex shrink-0 items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingAgent(agent);
-                            }}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-2.5 py-1.5 text-[12px] font-semibold text-ink-muted shadow-sm transition-colors hover:border-accent/40 hover:bg-accent-soft/40 hover:text-accent"
-                            aria-label="Edit agent"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                            <span className="hidden sm:inline">Edit</span>
-                          </button>
-                          <CustomDropdown
-                            align="right"
-                            menuWidth={176}
-                            trigger={
-                              <button
-                                type="button"
-                                className="shrink-0 rounded-lg p-1.5 text-ink-hint opacity-0 transition-all hover:bg-surface-muted hover:text-ink group-hover:opacity-100"
-                                aria-label="More options"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </button>
-                            }
-                          >
-                            <DropdownItem onClick={() => setEditingAgent(agent)}>Edit agent</DropdownItem>
-                            <DropdownItem>Clone</DropdownItem>
-                            <DropdownItem>Test call</DropdownItem>
-                            <DropdownItem danger>Archive</DropdownItem>
-                          </CustomDropdown>
-                        </div>
-                      </div>
+                      <p className="truncate text-[15px] font-semibold text-ink">{agent.name}</p>
 
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-ink-muted">
                         <span className="font-medium text-ink-muted">{agent.tier}</span>
@@ -499,7 +507,7 @@ export function AgentsView() {
                     </div>
                   </div>
 
-                  <div className="grid min-w-0 grid-cols-2 gap-x-5 gap-y-3 border-t border-border pt-3 sm:min-w-[300px] sm:border-0 sm:pt-0 lg:min-w-[360px]">
+                  <div className="grid min-w-0 grid-cols-2 gap-x-5 gap-y-3 border-t border-border pt-3 sm:min-w-[300px] sm:flex-1 sm:border-0 sm:pt-0 lg:min-w-[360px]">
                     <AgentDetailItem label="Language" value={agent.language} />
                     <AgentDetailItem label="Background sound" value={backgroundLabel} />
                     <AgentDetailItem
@@ -507,6 +515,50 @@ export function AgentsView() {
                       value={`${agent.extractionFields} field${agent.extractionFields === 1 ? "" : "s"}`}
                     />
                     <AgentDetailItem label="Created" value={agent.created} />
+                  </div>
+
+                  <div
+                    className="flex shrink-0 items-center justify-end gap-1 border-t border-border pt-3 sm:border-0 sm:pt-0 sm:pl-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setEditingAgent(agent)}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-violet-200/80 bg-violet-50 px-3 text-[12px] font-semibold text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100"
+                    >
+                      <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
+                      Edit
+                    </button>
+                    <AgentIconAction
+                      icon={Trash2}
+                      label="Delete agent"
+                      iconClassName="text-red-500"
+                      onClick={() => deleteAgent(agent.id)}
+                    />
+                    <CustomDropdown
+                      align="right"
+                      menuWidth={176}
+                      trigger={
+                        <div className="group/tip relative inline-flex">
+                          <span
+                            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center text-slate-500 transition-opacity hover:opacity-70"
+                            aria-label="More options"
+                          >
+                            <MoreHorizontal className="h-4 w-4" strokeWidth={2.25} />
+                          </span>
+                          <span
+                            role="tooltip"
+                            className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/tip:opacity-100"
+                          >
+                            More options
+                          </span>
+                        </div>
+                      }
+                    >
+                      <DropdownItem>Clone</DropdownItem>
+                      <DropdownItem>Test call</DropdownItem>
+                      <DropdownItem danger>Archive</DropdownItem>
+                    </CustomDropdown>
                   </div>
                 </div>
               </li>

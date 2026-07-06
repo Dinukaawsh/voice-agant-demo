@@ -35,7 +35,9 @@ export function CustomSelect({
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [menuRect, setMenuRect] = useState<{
-    top: number;
+    openUp: boolean;
+    top?: number;
+    bottom?: number;
     left: number;
     width: number;
     maxHeight: number;
@@ -59,10 +61,11 @@ export function CustomSelect({
       MENU_MAX_HEIGHT,
       openUp ? spaceAbove : spaceBelow,
     );
-    const top = openUp ? rect.top - maxHeight - 4 : rect.bottom + 4;
 
     setMenuRect({
-      top: Math.max(8, top),
+      openUp,
+      top: openUp ? undefined : rect.bottom + 4,
+      bottom: openUp ? window.innerHeight - rect.top + 4 : undefined,
       left: Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8)),
       width: rect.width,
       maxHeight: Math.max(100, maxHeight),
@@ -109,7 +112,8 @@ export function CustomSelect({
         ref={menuRef}
         style={{
           position: "fixed",
-          top: menuRect.top,
+          top: menuRect.openUp ? undefined : menuRect.top,
+          bottom: menuRect.openUp ? menuRect.bottom : undefined,
           left: menuRect.left,
           width: menuRect.width,
           maxHeight: menuRect.maxHeight,
