@@ -11,10 +11,12 @@ import {
   Phone,
   PhoneOff,
   ArrowDown,
+  ArrowRight,
   ShieldCheck,
   Sparkles,
   MessageSquare,
   Upload,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { FlowNode, AnswerType } from "./types";
@@ -85,6 +87,21 @@ function UploadBadge({ has }: { has: boolean }) {
   );
 }
 
+function RuleBadge({ rule }: { rule: string }) {
+  return (
+    <div className="mt-2 flex items-center gap-2 rounded-lg border border-amber-300/60 bg-amber-50/80 px-3 py-1.5">
+      <Settings2 className="h-3.5 w-3.5 shrink-0 text-amber-600" />
+      <span className="min-w-0 flex-1 text-[11px] font-medium text-amber-800">
+        Rule: {rule}
+      </span>
+      <button className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 transition-colors hover:bg-amber-100">
+        <Pencil className="h-2.5 w-2.5" />
+        Edit rule
+      </button>
+    </div>
+  );
+}
+
 function NodeCard({
   node,
   onMoveUp,
@@ -103,7 +120,7 @@ function NodeCard({
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="group/node relative">
+    <div className="group/node relative w-full">
       <div
         className={cn(
           "rounded-xl border-2 transition-all hover:shadow-md",
@@ -186,7 +203,6 @@ function NodeCard({
         {/* Body */}
         {expanded && (
           <div className="border-t border-white/60 px-3 pb-3 pt-2">
-            {/* Opening substages */}
             {node.type === "opening" && node.substages ? (
               <div className="space-y-2">
                 {node.substages.map((sub) => (
@@ -209,9 +225,12 @@ function NodeCard({
                 </button>
               </div>
             ) : (
-              <p className="text-[12px] leading-relaxed text-[#0A2353]/80">
-                {node.script}
-              </p>
+              <>
+                <p className="text-[12px] leading-relaxed text-[#0A2353]/80">
+                  {node.script}
+                </p>
+                {node.rule && <RuleBadge rule={node.rule} />}
+              </>
             )}
           </div>
         )}
@@ -220,30 +239,19 @@ function NodeCard({
   );
 }
 
-function FailBranch({
-  rule,
-  failScript,
-  hasRecording,
-}: {
-  rule: string;
-  failScript: string;
-  hasRecording: boolean;
-}) {
+function EndNode({ failScript, hasRecording }: { failScript: string; hasRecording: boolean }) {
   return (
-    <div className="relative ml-8 mt-1 flex items-start gap-0">
-      {/* Horizontal connector from the main line */}
-      <div className="absolute -left-8 top-0 flex items-center">
-        <div className="h-0.5 w-8 bg-red-300" />
-      </div>
-      {/* Fail branch card */}
-      <div className="w-full max-w-sm rounded-xl border-2 border-dashed border-red-300 bg-red-50/70">
+    <div className="flex w-full flex-col items-center">
+      {/* Script card */}
+      <div className="w-full rounded-xl border-2 border-red-300/60 bg-red-50/80">
         <div className="flex items-center gap-2 px-3 py-2">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500 text-white">
             <PhoneOff className="h-3 w-3" />
           </div>
-          <span className="text-[11px] font-bold uppercase tracking-wide text-red-500">
-            Rule fails → End call
+          <span className="text-[12px] font-bold text-red-700">
+            END
           </span>
+          <span className="text-[11px] text-red-500">Fin de l&apos;appel</span>
           <div className="flex-1" />
           <UploadBadge has={hasRecording} />
           <button className="rounded-lg p-1 text-[#7b89a8] hover:bg-white hover:text-[#5B58EB]">
@@ -251,39 +259,104 @@ function FailBranch({
           </button>
         </div>
         <div className="border-t border-red-200/60 px-3 pb-2.5 pt-2">
-          <div className="mb-1.5 flex items-center gap-1.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-red-400" />
-            <span className="text-[10px] font-semibold text-red-500">Rule: {rule}</span>
-          </div>
           <p className="text-[11px] italic leading-relaxed text-red-700/80">
-            {failScript}
+            &ldquo;{failScript}&rdquo;
           </p>
-        </div>
-        {/* End indicator */}
-        <div className="flex items-center justify-center border-t border-red-200/60 py-1.5">
-          <div className="flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-0.5">
-            <PhoneOff className="h-3 w-3 text-red-500" />
-            <span className="text-[10px] font-semibold text-red-600">Call ends</span>
-          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function Connector({ hasRule }: { hasRule?: boolean }) {
+function VerticalConnector({ label, color = "gray" }: { label?: string; color?: "gray" | "green" | "red" }) {
+  const lineColor = color === "green" ? "bg-emerald-400" : color === "red" ? "bg-red-400" : "bg-[#d0d5e4]";
+  const arrowColor = color === "green" ? "text-emerald-400" : color === "red" ? "text-red-400" : "text-[#d0d5e4]";
+
   return (
-    <div className="flex flex-col items-center py-1">
-      <div className={cn("w-0.5", hasRule ? "h-3 bg-[#d0d5e4]" : "h-6 bg-[#d0d5e4]")} />
-      {hasRule && (
-        <div className="flex items-center gap-1.5">
-          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-600">
-            PASS → Next
-          </span>
-        </div>
+    <div className="flex flex-col items-center py-0.5">
+      <div className={cn("h-4 w-0.5", lineColor)} />
+      {label && (
+        <span
+          className={cn(
+            "rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+            color === "green"
+              ? "bg-emerald-100 text-emerald-700"
+              : color === "red"
+                ? "bg-red-100 text-red-600"
+                : "bg-[#e4e7f1] text-[#7b89a8]",
+          )}
+        >
+          {label}
+        </span>
       )}
-      <ArrowDown className="h-3 w-3 text-[#d0d5e4] -mt-0.5" />
-      <div className="h-2 w-0.5 bg-[#d0d5e4]" />
+      <ArrowDown className={cn("h-3.5 w-3.5 -mt-0.5", arrowColor)} />
+      <div className={cn("h-2 w-0.5", lineColor)} />
+    </div>
+  );
+}
+
+function BranchRow({
+  node,
+  onEdit,
+  isLast,
+  onMoveUp,
+  onMoveDown,
+}: {
+  node: FlowNode;
+  onEdit: () => void;
+  isLast: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+}) {
+  const hasFail = !!(node.rule && node.failScript);
+
+  return (
+    <div className="relative w-full">
+      {/* Horizontal layout: main node left, fail branch right */}
+      <div className={cn("flex items-start gap-0", hasFail ? "justify-start" : "justify-center")}>
+        {/* Main node column */}
+        <div className={cn("flex flex-col items-center", hasFail ? "w-[55%] shrink-0" : "w-full max-w-lg")}>
+          <NodeCard
+            node={node}
+            onEdit={onEdit}
+            onMoveUp={onMoveUp}
+            onMoveDown={onMoveDown}
+            onDelete={node.type === "question" ? () => {} : undefined}
+          />
+          {!isLast && (
+            <VerticalConnector
+              label={hasFail ? "PASS" : undefined}
+              color={hasFail ? "green" : "gray"}
+            />
+          )}
+        </div>
+
+        {/* Fail branch — horizontal connector + END node */}
+        {hasFail && (
+          <div className="flex items-start pt-6">
+            {/* Horizontal arrow connector */}
+            <div className="flex flex-col items-center">
+              <div className="flex items-center">
+                <div className="h-0.5 w-10 bg-red-400" />
+                <div className="flex flex-col items-center">
+                  <span className="mb-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-600">
+                    FAIL
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5 text-red-400 -ml-0.5" />
+                </div>
+                <div className="h-0.5 w-4 bg-red-400" />
+              </div>
+            </div>
+            {/* END node */}
+            <div className="w-52 shrink-0">
+              <EndNode
+                failScript={node.failScript!}
+                hasRecording={false}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -296,7 +369,7 @@ export function FlowDiagram({
   onEdit?: (nodeId: string) => void;
 }) {
   return (
-    <div className="flex flex-col items-center px-4 py-4">
+    <div className="flex flex-col items-center px-6 py-4">
       {/* Start pill */}
       <div className="flex items-center gap-2 rounded-full bg-[#112C70] px-4 py-1.5 shadow-sm">
         <Phone className="h-3.5 w-3.5 text-[#56E1E9]" />
@@ -307,35 +380,22 @@ export function FlowDiagram({
       <div className="h-4 w-0.5 bg-[#d0d5e4]" />
 
       {nodes.map((node, i) => (
-        <div key={node.id} className="w-full max-w-lg">
-          <NodeCard
-            node={node}
-            onEdit={() => onEdit?.(node.id)}
-            onMoveUp={
-              node.type === "question" && i > 1
-                ? () => {}
-                : undefined
-            }
-            onMoveDown={
-              node.type === "question" &&
-              i < nodes.length - 3
-                ? () => {}
-                : undefined
-            }
-            onDelete={
-              node.type === "question" ? () => {} : undefined
-            }
-          />
-          {/* Fail branch — rendered as a side path from the question node */}
-          {node.rule && node.failScript && (
-            <FailBranch
-              rule={node.rule}
-              failScript={node.failScript}
-              hasRecording={false}
-            />
-          )}
-          {i < nodes.length - 1 && <Connector hasRule={!!node.rule} />}
-        </div>
+        <BranchRow
+          key={node.id}
+          node={node}
+          onEdit={() => onEdit?.(node.id)}
+          isLast={i === nodes.length - 1}
+          onMoveUp={
+            node.type === "question" && i > 1
+              ? () => {}
+              : undefined
+          }
+          onMoveDown={
+            node.type === "question" && i < nodes.length - 3
+              ? () => {}
+              : undefined
+          }
+        />
       ))}
 
       {/* Add question button */}
