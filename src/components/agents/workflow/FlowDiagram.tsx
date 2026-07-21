@@ -71,9 +71,19 @@ const TYPE_ICONS: Record<FlowNode["type"], typeof Phone> = {
   exit: PhoneOff,
 };
 
-function UploadBadge({ has }: { has: boolean }) {
+function UploadBadge({
+  has,
+  onClick,
+}: {
+  has: boolean;
+  onClick?: () => void;
+}) {
   return (
     <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
       className={cn(
         "flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all",
         has
@@ -87,14 +97,20 @@ function UploadBadge({ has }: { has: boolean }) {
   );
 }
 
-function RuleBadge({ rule }: { rule: string }) {
+function RuleBadge({ rule, onEditRule }: { rule: string; onEditRule?: () => void }) {
   return (
     <div className="mt-2 flex items-center gap-2 rounded-lg border border-amber-300/60 bg-amber-50/80 px-3 py-1.5">
       <Settings2 className="h-3.5 w-3.5 shrink-0 text-amber-600" />
       <span className="min-w-0 flex-1 text-[11px] font-medium text-amber-800">
         Rule: {rule}
       </span>
-      <button className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 transition-colors hover:bg-amber-100">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onEditRule?.();
+        }}
+        className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 transition-colors hover:bg-amber-100"
+      >
         <Pencil className="h-2.5 w-2.5" />
         Edit rule
       </button>
@@ -108,12 +124,14 @@ function NodeCard({
   onMoveDown,
   onEdit,
   onDelete,
+  onUpload,
 }: {
   node: FlowNode;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onEdit: () => void;
   onDelete?: () => void;
+  onUpload?: () => void;
 }) {
   const style = NODE_STYLES[node.type];
   const Icon = TYPE_ICONS[node.type];
@@ -172,7 +190,7 @@ function NodeCard({
           </div>
 
           <div className="flex items-center gap-1">
-            <UploadBadge has={node.type === "opening" ? false : node.hasRecording} />
+            <UploadBadge has={node.type === "opening" ? false : node.hasRecording} onClick={onUpload} />
             <button
               onClick={onEdit}
               className="rounded-lg p-1.5 text-[#7b89a8] transition-colors hover:bg-white hover:text-[#5B58EB]"
@@ -216,7 +234,7 @@ function NodeCard({
                     <p className="min-w-0 flex-1 text-[12px] leading-relaxed text-[#0A2353]/80">
                       {sub.script}
                     </p>
-                    <UploadBadge has={sub.hasRecording} />
+                    <UploadBadge has={sub.hasRecording} onClick={onUpload} />
                   </div>
                 ))}
                 <button className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-[#5B58EB] transition-colors hover:bg-[#5B58EB]/5">
@@ -229,7 +247,7 @@ function NodeCard({
                 <p className="text-[12px] leading-relaxed text-[#0A2353]/80">
                   {node.script}
                 </p>
-                {node.rule && <RuleBadge rule={node.rule} />}
+                {node.rule && <RuleBadge rule={node.rule} onEditRule={onEdit} />}
               </>
             )}
           </div>
@@ -239,10 +257,9 @@ function NodeCard({
   );
 }
 
-function EndNode({ failScript, hasRecording }: { failScript: string; hasRecording: boolean }) {
+function EndNode({ failScript, hasRecording, onUpload }: { failScript: string; hasRecording: boolean; onUpload?: () => void }) {
   return (
     <div className="flex w-full flex-col items-center">
-      {/* Script card */}
       <div className="w-full rounded-xl border-2 border-red-300/60 bg-red-50/80">
         <div className="flex items-center gap-2 px-3 py-2">
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500 text-white">
@@ -253,7 +270,7 @@ function EndNode({ failScript, hasRecording }: { failScript: string; hasRecordin
           </span>
           <span className="text-[11px] text-red-500">Fin de l&apos;appel</span>
           <div className="flex-1" />
-          <UploadBadge has={hasRecording} />
+          <UploadBadge has={hasRecording} onClick={onUpload} />
           <button className="rounded-lg p-1 text-[#7b89a8] hover:bg-white hover:text-[#5B58EB]">
             <Pencil className="h-3 w-3" />
           </button>
@@ -274,7 +291,7 @@ function VerticalConnector({ label, color = "gray" }: { label?: string; color?: 
 
   return (
     <div className="flex flex-col items-center py-0.5">
-      <div className={cn("h-4 w-0.5", lineColor)} />
+      <div className={cn("h-5 w-0.5 rounded-full", lineColor)} />
       {label && (
         <span
           className={cn(
@@ -289,8 +306,8 @@ function VerticalConnector({ label, color = "gray" }: { label?: string; color?: 
           {label}
         </span>
       )}
-      <ArrowDown className={cn("h-3.5 w-3.5 -mt-0.5", arrowColor)} />
-      <div className={cn("h-2 w-0.5", lineColor)} />
+      <ArrowDown className={cn("h-3.5 w-3.5", arrowColor)} />
+      <div className={cn("h-3 w-0.5 rounded-full", lineColor)} />
     </div>
   );
 }
@@ -298,12 +315,16 @@ function VerticalConnector({ label, color = "gray" }: { label?: string; color?: 
 function BranchRow({
   node,
   onEdit,
+  onUpload,
+  onDelete,
   isLast,
   onMoveUp,
   onMoveDown,
 }: {
   node: FlowNode;
   onEdit: () => void;
+  onUpload: () => void;
+  onDelete?: () => void;
   isLast: boolean;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
@@ -312,16 +333,16 @@ function BranchRow({
 
   return (
     <div className="relative w-full">
-      {/* Horizontal layout: main node left, fail branch right */}
       <div className={cn("flex items-start gap-0", hasFail ? "justify-start" : "justify-center")}>
         {/* Main node column */}
         <div className={cn("flex flex-col items-center", hasFail ? "w-[55%] shrink-0" : "w-full max-w-lg")}>
           <NodeCard
             node={node}
             onEdit={onEdit}
+            onUpload={onUpload}
             onMoveUp={onMoveUp}
             onMoveDown={onMoveDown}
-            onDelete={node.type === "question" ? () => {} : undefined}
+            onDelete={onDelete}
           />
           {!isLast && (
             <VerticalConnector
@@ -331,27 +352,24 @@ function BranchRow({
           )}
         </div>
 
-        {/* Fail branch — horizontal connector + END node */}
+        {/* Fail branch */}
         {hasFail && (
           <div className="flex items-start pt-6">
-            {/* Horizontal arrow connector */}
-            <div className="flex flex-col items-center">
-              <div className="flex items-center">
-                <div className="h-0.5 w-10 bg-red-400" />
-                <div className="flex flex-col items-center">
-                  <span className="mb-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-600">
-                    FAIL
-                  </span>
-                  <ArrowRight className="h-3.5 w-3.5 text-red-400 -ml-0.5" />
-                </div>
-                <div className="h-0.5 w-4 bg-red-400" />
+            <div className="flex items-center">
+              <div className="h-0.5 w-8 bg-red-400" />
+              <div className="flex flex-col items-center">
+                <span className="mb-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-600">
+                  FAIL
+                </span>
+                <ArrowRight className="h-3.5 w-3.5 -ml-0.5 text-red-400" />
               </div>
+              <div className="h-0.5 w-4 bg-red-400" />
             </div>
-            {/* END node */}
             <div className="w-52 shrink-0">
               <EndNode
                 failScript={node.failScript!}
                 hasRecording={false}
+                onUpload={onUpload}
               />
             </div>
           </div>
@@ -364,9 +382,15 @@ function BranchRow({
 export function FlowDiagram({
   nodes,
   onEdit,
+  onUpload,
+  onDelete,
+  onAddQuestion,
 }: {
   nodes: FlowNode[];
   onEdit?: (nodeId: string) => void;
+  onUpload?: (nodeId: string) => void;
+  onDelete?: (nodeId: string) => void;
+  onAddQuestion?: () => void;
 }) {
   return (
     <div className="flex flex-col items-center px-6 py-4">
@@ -377,13 +401,17 @@ export function FlowDiagram({
           Call starts
         </span>
       </div>
-      <div className="h-4 w-0.5 bg-[#d0d5e4]" />
+
+      {/* Connector from start to first node */}
+      <VerticalConnector />
 
       {nodes.map((node, i) => (
         <BranchRow
           key={node.id}
           node={node}
           onEdit={() => onEdit?.(node.id)}
+          onUpload={() => onUpload?.(node.id)}
+          onDelete={node.type === "question" ? () => onDelete?.(node.id) : undefined}
           isLast={i === nodes.length - 1}
           onMoveUp={
             node.type === "question" && i > 1
@@ -399,17 +427,20 @@ export function FlowDiagram({
       ))}
 
       {/* Add question button */}
-      <div className="mt-1 flex flex-col items-center">
-        <div className="h-3 w-0.5 bg-[#d0d5e4]" />
-        <button className="flex items-center gap-1.5 rounded-full border-2 border-dashed border-[#8B63FF]/30 bg-[#8B63FF]/5 px-4 py-2 text-[12px] font-medium text-[#8B63FF] transition-all hover:border-[#8B63FF]/50 hover:bg-[#8B63FF]/10">
+      <div className="flex flex-col items-center">
+        <VerticalConnector />
+        <button
+          onClick={onAddQuestion}
+          className="flex items-center gap-1.5 rounded-full border-2 border-dashed border-[#8B63FF]/30 bg-[#8B63FF]/5 px-4 py-2 text-[12px] font-medium text-[#8B63FF] transition-all hover:border-[#8B63FF]/50 hover:bg-[#8B63FF]/10"
+        >
           <Plus className="h-3.5 w-3.5" />
           Add question
         </button>
       </div>
 
       {/* End pill */}
-      <div className="mt-3 flex flex-col items-center">
-        <div className="h-4 w-0.5 bg-[#d0d5e4]" />
+      <div className="flex flex-col items-center">
+        <VerticalConnector />
         <div className="flex items-center gap-2 rounded-full bg-[#112C70] px-4 py-1.5 shadow-sm">
           <PhoneOff className="h-3.5 w-3.5 text-[#56E1E9]" />
           <span className="text-[11px] font-semibold text-white">
