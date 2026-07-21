@@ -9,6 +9,8 @@ import {
   Sparkles,
   Check,
   Mic,
+  Globe,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -37,9 +39,22 @@ export function WorkflowBuilder() {
   const [showRequestRecordings, setShowRequestRecordings] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  // Save state
+  // Language & save state
+  const [language, setLanguage] = useState(workflow.language);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [savedDraft, setSavedDraft] = useState(false);
   const [finalized, setFinalized] = useState(false);
+
+  const LANGUAGES = [
+    { code: "French", flag: "\u{1F1EB}\u{1F1F7}", label: "French" },
+    { code: "English", flag: "\u{1F1EC}\u{1F1E7}", label: "English" },
+    { code: "Spanish", flag: "\u{1F1EA}\u{1F1F8}", label: "Spanish" },
+    { code: "German", flag: "\u{1F1E9}\u{1F1EA}", label: "German" },
+    { code: "Italian", flag: "\u{1F1EE}\u{1F1F9}", label: "Italian" },
+    { code: "Portuguese", flag: "\u{1F1F5}\u{1F1F9}", label: "Portuguese" },
+    { code: "Arabic", flag: "\u{1F1F8}\u{1F1E6}", label: "Arabic" },
+  ];
+  const currentLang = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0];
 
   function handleSend(text: string) {
     const userMsg: ChatMessage = {
@@ -160,6 +175,49 @@ export function WorkflowBuilder() {
                 )}>
                   {finalized ? "Finalized" : "Draft"}
                 </span>
+                {/* Language selector */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowLangDropdown(!showLangDropdown)}
+                    className="flex items-center gap-1 rounded-md border border-[#d0d5e4] bg-white px-2 py-0.5 text-[10px] font-medium text-[#0A2353] transition-all hover:border-[#5B58EB]/40"
+                  >
+                    <Globe className="h-3 w-3 text-[#7b89a8]" />
+                    <span>{currentLang.flag}</span>
+                    <span>{currentLang.label}</span>
+                    <ChevronDown className="h-2.5 w-2.5 text-[#7b89a8]" />
+                  </button>
+                  {showLangDropdown && (
+                    <>
+                      <button
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowLangDropdown(false)}
+                      />
+                      <div className="absolute left-0 top-full z-50 mt-1 w-36 rounded-lg border border-[#d0d5e4] bg-white py-1 shadow-lg">
+                        {LANGUAGES.map((lang) => (
+                          <button
+                            key={lang.code}
+                            onClick={() => {
+                              setLanguage(lang.code);
+                              setShowLangDropdown(false);
+                            }}
+                            className={cn(
+                              "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11px] transition-colors hover:bg-[#f0f2f8]",
+                              language === lang.code
+                                ? "font-semibold text-[#5B58EB]"
+                                : "text-[#0A2353]",
+                            )}
+                          >
+                            <span>{lang.flag}</span>
+                            <span>{lang.label}</span>
+                            {language === lang.code && (
+                              <Check className="ml-auto h-3 w-3 text-[#5B58EB]" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>

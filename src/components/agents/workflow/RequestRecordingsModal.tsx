@@ -8,7 +8,6 @@ import {
   Clock,
   Send,
   FileAudio,
-  User,
   Phone,
   MessageSquare,
   ShieldCheck,
@@ -37,21 +36,13 @@ export function RequestRecordingsModal({
   onClose: () => void;
   onSubmit: () => void;
 }) {
-  const [selected, setSelected] = useState<Set<string>>(
-    new Set(nodes.filter((n) => !n.hasRecording).map((n) => n.id)),
-  );
   const [voicePreference, setVoicePreference] = useState("female-french");
   const [notes, setNotes] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  function toggleNode(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
+  const totalNodes = nodes.length;
+  const withRecording = nodes.filter((n) => n.hasRecording).length;
+  const needsRecording = totalNodes - withRecording;
 
   function handleSubmit() {
     setSubmitted(true);
@@ -73,7 +64,7 @@ export function RequestRecordingsModal({
             Recording request submitted!
           </h2>
           <p className="text-center text-[13px] leading-relaxed text-[#7b89a8]">
-            We've received your request for {selected.size} recording(s).
+            We've received your request for all {totalNodes} node recordings.
             Our team will prepare professional voice clips based on your scripts.
             You'll receive a notification when they're ready.
           </p>
@@ -106,7 +97,7 @@ export function RequestRecordingsModal({
               Request professional recordings
             </h2>
             <p className="text-[11px] text-[#7b89a8]">
-              {agentName} — select nodes that need recordings
+              {agentName}
             </p>
           </div>
           <button
@@ -119,64 +110,47 @@ export function RequestRecordingsModal({
 
         {/* Body */}
         <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-5 py-4">
-          {/* Node selection */}
-          <div>
-            <label className="mb-2 flex items-center justify-between text-[12px] font-semibold text-[#0A2353]">
-              <span>Select nodes</span>
-              <button
-                onClick={() => {
-                  if (selected.size === nodes.length) {
-                    setSelected(new Set());
-                  } else {
-                    setSelected(new Set(nodes.map((n) => n.id)));
-                  }
-                }}
-                className="text-[11px] font-medium text-[#5B58EB] hover:underline"
-              >
-                {selected.size === nodes.length ? "Deselect all" : "Select all"}
-              </button>
-            </label>
-            <div className="max-h-[200px] space-y-1.5 overflow-y-auto rounded-lg border border-[#d0d5e4] bg-[#f0f2f8]/40 p-2">
+          {/* All nodes summary */}
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <FileAudio className="h-4 w-4 text-emerald-600" />
+              <span className="text-[13px] font-semibold text-[#0A2353]">
+                All {totalNodes} nodes will be recorded
+              </span>
+            </div>
+            <div className="space-y-1.5">
               {nodes.map((node) => {
                 const Icon = TYPE_ICONS[node.type];
-                const isSelected = selected.has(node.id);
                 return (
-                  <button
+                  <div
                     key={node.id}
-                    onClick={() => toggleNode(node.id)}
-                    className={cn(
-                      "flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-left transition-all",
-                      isSelected
-                        ? "border-emerald-300 bg-emerald-50/80"
-                        : "border-transparent bg-white hover:border-[#d0d5e4]",
-                    )}
+                    className="flex items-center gap-2.5 rounded-lg bg-white/80 px-3 py-1.5"
                   >
-                    <div
-                      className={cn(
-                        "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all",
-                        isSelected
-                          ? "border-emerald-500 bg-emerald-500"
-                          : "border-[#d0d5e4] bg-white",
-                      )}
-                    >
-                      {isSelected && <Check className="h-3 w-3 text-white" />}
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-emerald-500 bg-emerald-500">
+                      <Check className="h-3 w-3 text-white" />
                     </div>
-                    <Icon className="h-3.5 w-3.5 shrink-0 text-[#7b89a8]" />
-                    <span className="flex-1 text-[12px] font-medium text-[#0A2353]">
+                    <Icon className="h-3 w-3 shrink-0 text-[#7b89a8]" />
+                    <span className="flex-1 text-[11px] font-medium text-[#0A2353]">
                       {node.label}
                     </span>
                     {node.hasRecording ? (
                       <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-semibold text-emerald-700">
-                        Has recording
+                        Re-record
                       </span>
                     ) : (
                       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-semibold text-amber-700">
-                        Needs recording
+                        New
                       </span>
                     )}
-                  </button>
+                  </div>
                 );
               })}
+            </div>
+            <div className="mt-2 flex items-center gap-4 text-[10px] text-[#7b89a8]">
+              <span>{needsRecording} new recording(s)</span>
+              {withRecording > 0 && (
+                <span>{withRecording} will be re-recorded</span>
+              )}
             </div>
           </div>
 
@@ -187,10 +161,10 @@ export function RequestRecordingsModal({
             </label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { value: "female-french", label: "Female — French", icon: "🇫🇷" },
-                { value: "male-french", label: "Male — French", icon: "🇫🇷" },
-                { value: "female-english", label: "Female — English", icon: "🇬🇧" },
-                { value: "male-english", label: "Male — English", icon: "🇬🇧" },
+                { value: "female-french", label: "Female — French", icon: "\u{1F1EB}\u{1F1F7}" },
+                { value: "male-french", label: "Male — French", icon: "\u{1F1EB}\u{1F1F7}" },
+                { value: "female-english", label: "Female — English", icon: "\u{1F1EC}\u{1F1E7}" },
+                { value: "male-english", label: "Male — English", icon: "\u{1F1EC}\u{1F1E7}" },
               ].map((v) => (
                 <button
                   key={v.value}
@@ -224,19 +198,6 @@ export function RequestRecordingsModal({
               className="w-full rounded-lg border border-[#d0d5e4] px-3 py-2 text-[12px] text-[#0A2353] placeholder:text-[#7b89a8] transition-all focus:border-[#5B58EB]/40 focus:outline-none focus:ring-2 focus:ring-[#5B58EB]/10"
             />
           </div>
-
-          {/* Summary */}
-          <div className="flex items-center gap-3 rounded-lg bg-[#f0f2f8] px-3 py-2.5">
-            <FileAudio className="h-4 w-4 text-[#5B58EB]" />
-            <div className="flex-1">
-              <span className="text-[12px] font-medium text-[#0A2353]">
-                {selected.size} recording(s) will be requested
-              </span>
-              <p className="text-[10px] text-[#7b89a8]">
-                Scripts from your nodes will be sent to the recording team
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
@@ -249,16 +210,10 @@ export function RequestRecordingsModal({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={selected.size === 0}
-            className={cn(
-              "flex items-center gap-1.5 rounded-full px-5 py-2 text-[12px] font-semibold shadow-sm transition-all",
-              selected.size > 0
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                : "cursor-not-allowed bg-[#d0d5e4] text-[#7b89a8]",
-            )}
+            className="flex items-center gap-1.5 rounded-full bg-emerald-600 px-5 py-2 text-[12px] font-semibold text-white shadow-sm transition-all hover:bg-emerald-700"
           >
             <Send className="h-3.5 w-3.5" />
-            Submit request
+            Submit request for all {totalNodes} nodes
           </button>
         </div>
       </div>

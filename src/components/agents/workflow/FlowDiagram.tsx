@@ -268,7 +268,6 @@ function EndNode({ failScript, hasRecording, onUpload }: { failScript: string; h
           <span className="text-[12px] font-bold text-red-700">
             END
           </span>
-          <span className="text-[11px] text-red-500">Fin de l&apos;appel</span>
           <div className="flex-1" />
           <UploadBadge has={hasRecording} onClick={onUpload} />
           <button className="rounded-lg p-1 text-[#7b89a8] hover:bg-white hover:text-[#5B58EB]">
@@ -290,12 +289,12 @@ function VerticalConnector({ label, color = "gray" }: { label?: string; color?: 
   const arrowColor = color === "green" ? "text-emerald-400" : color === "red" ? "text-red-400" : "text-[#d0d5e4]";
 
   return (
-    <div className="flex flex-col items-center py-0.5">
-      <div className={cn("h-5 w-0.5 rounded-full", lineColor)} />
+    <div className="flex flex-col items-center">
+      <div className={cn("h-4 w-0.5", lineColor)} />
       {label && (
         <span
           className={cn(
-            "rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+            "my-0.5 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
             color === "green"
               ? "bg-emerald-100 text-emerald-700"
               : color === "red"
@@ -306,8 +305,8 @@ function VerticalConnector({ label, color = "gray" }: { label?: string; color?: 
           {label}
         </span>
       )}
-      <ArrowDown className={cn("h-3.5 w-3.5", arrowColor)} />
-      <div className={cn("h-3 w-0.5 rounded-full", lineColor)} />
+      <div className={cn("h-3 w-0.5", lineColor)} />
+      <ArrowDown className={cn("h-3 w-3 -mt-[1px]", arrowColor)} />
     </div>
   );
 }

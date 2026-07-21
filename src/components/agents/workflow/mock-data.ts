@@ -159,19 +159,19 @@ export const MOCK_CHAT_HISTORY: ChatMessage[] = [
   {
     id: "m2",
     role: "assistant",
-    text: "I’ve set up your agent flow with a 2-part opening, 4 qualification questions, eligibility confirmation, and a success closing. Question 3 (current coverage) has a yes/no rule — if they don’t answer clearly, the call ends with an exit script. You can see the full flow on the right. Would you like to adjust any scripts or add more questions?",
+    text: "I've created your agent flow with a 2-part opening, 4 qualification questions, eligibility confirmation, and a success closing. Question 3 (current coverage) has a yes/no rule — if they don't answer clearly, the call ends with an exit script.\n\nI've also included 4 common edge case scripts by default: \"Not interested\", \"Busy / call back later\", \"Asks who is calling\", and \"Already has good coverage\". These are the most frequent objections in insurance qualification — you can review and edit them in the Edge Cases tab. Check the full flow on the right!",
     timestamp: new Date("2026-07-21T10:00:15"),
   },
   {
     id: "m3",
     role: "user",
-    text: "Add edge cases for when someone is not interested, busy, asks who is calling, or says they already have good coverage.",
+    text: "The edge cases look good. Can you also add a silence prompt for when they go quiet?",
     timestamp: new Date("2026-07-21T10:01:00"),
   },
   {
     id: "m4",
     role: "assistant",
-    text: "Done — I’ve added 4 edge cases with French scripts. The “Not interested” and “Busy” cases end politely, “Who is calling” re-introduces the agent, and “Already covered” tries to re-engage. Check the Edge Cases panel below the flow. Want me to create question variations too?",
+    text: "Done — I've added a silence prompt: \"Allô ? Vous êtes toujours là ?\" This will play if the caller goes silent for too long. You can customize the timing and script in the Silence tab. Want me to create question variations too?",
     timestamp: new Date("2026-07-21T10:01:20"),
   },
   {
@@ -183,7 +183,7 @@ export const MOCK_CHAT_HISTORY: ChatMessage[] = [
   {
     id: "m6",
     role: "assistant",
-    text: "Added 3 question variations with natural rephrasings. They appear in the Variations panel. Now you can upload recordings for each node — click the mic icon on any card. What else would you like to adjust?",
+    text: "Added 3 question variations with natural rephrasings. They appear in the Variations tab. Now you can upload recordings for each node — click the mic icon on any card, or use \"Request recordings\" to have our team record all scripts professionally. What else would you like to adjust?",
     timestamp: new Date("2026-07-21T10:02:15"),
   },
 ];
