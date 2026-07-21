@@ -68,23 +68,23 @@ export function Sidebar({
           onClick={onCloseMobile}
         >
           <div className="flex w-12 shrink-0 justify-center">
-            <SidebarIconBox className="border-blue-500 bg-white text-blue-600 group-hover/logo:bg-blue-500 group-hover/logo:text-white">
+            <SidebarIconBox className="border-[#5B58EB] bg-[#112C70] text-[#56E1E9] group-hover/logo:bg-[#5B58EB] group-hover/logo:text-white">
               <Mic2 className="h-4 w-4" strokeWidth={2.25} />
             </SidebarIconBox>
           </div>
           {isExpanded && (
             <div className="ml-1 min-w-0 flex-1 overflow-hidden">
-              <p className="truncate text-sm font-semibold tracking-tight text-ink">
+              <p className="truncate text-sm font-semibold tracking-tight text-white">
                 Twist Voice
               </p>
-              <p className="truncate text-[11px] text-ink-hint">AI Voice Platform</p>
+              <p className="truncate text-[11px] text-[#56E1E9]/60">AI Voice Platform</p>
             </div>
           )}
         </Link>
         {mobileOpen && (
           <button
             type="button"
-            className="ml-1 shrink-0 rounded-lg p-1.5 text-ink-hint hover:bg-sidebar-hover hover:text-ink lg:hidden"
+            className="ml-1 shrink-0 rounded-lg p-1.5 text-white/50 hover:bg-white/10 hover:text-white lg:hidden"
             onClick={onCloseMobile}
             aria-label="Close menu"
           >
@@ -124,13 +124,13 @@ export function Sidebar({
                   <span
                     className={cn(
                       "min-w-0 flex-1 truncate text-[13.5px] font-medium",
-                      active ? "text-accent" : "text-ink-muted group-hover/item:text-ink",
+                      active ? "text-[#56E1E9]" : "text-white/60 group-hover/item:text-white",
                     )}
                   >
                     {item.label}
                   </span>
                   {active && (
-                    <span className="mr-3 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                    <span className="mr-3 h-1.5 w-1.5 shrink-0 rounded-full bg-[#56E1E9]" />
                   )}
                 </>
               )}
@@ -146,12 +146,12 @@ export function Sidebar({
           className="group/item flex h-11 w-full items-center rounded-xl transition-colors hover:bg-sidebar-hover"
         >
           <div className="flex w-12 shrink-0 justify-center">
-            <SidebarIconBox className="border-slate-500 bg-white text-slate-600 group-hover/item:bg-slate-600 group-hover/item:text-white">
+            <SidebarIconBox className="border-white/20 bg-white/10 text-white/60 group-hover/item:bg-white/20 group-hover/item:text-white">
               <LogOut className="h-4 w-4" strokeWidth={2.25} />
             </SidebarIconBox>
           </div>
           {isExpanded && (
-            <span className="truncate text-[13px] text-ink-hint group-hover/item:text-ink-muted">
+            <span className="truncate text-[13px] text-white/40 group-hover/item:text-white/70">
               Sign out
             </span>
           )}

@@ -29,8 +29,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: LayoutDashboard,
     description: "Overview, charts, and KPIs",
     iconIdle:
-      "border-blue-500 bg-white text-blue-600 group-hover/item:bg-blue-500 group-hover/item:text-white",
-    iconActive: "border-blue-500 bg-blue-500 text-white",
+      "border-[#5B58EB]/40 bg-[#112C70] text-[#5B58EB] group-hover/item:bg-[#5B58EB] group-hover/item:text-white",
+    iconActive: "border-[#5B58EB] bg-[#5B58EB] text-white",
   },
   {
     label: "Agents",
@@ -38,8 +38,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Bot,
     description: "Manage AI voice agents",
     iconIdle:
-      "border-violet-500 bg-white text-violet-600 group-hover/item:bg-violet-500 group-hover/item:text-white",
-    iconActive: "border-violet-500 bg-violet-500 text-white",
+      "border-[#8B63FF]/40 bg-[#112C70] text-[#8B63FF] group-hover/item:bg-[#8B63FF] group-hover/item:text-white",
+    iconActive: "border-[#8B63FF] bg-[#8B63FF] text-white",
   },
   {
     label: "Campaigns",
@@ -47,7 +47,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Megaphone,
     description: "Outbound dialing campaigns",
     iconIdle:
-      "border-orange-500 bg-white text-orange-600 group-hover/item:bg-orange-500 group-hover/item:text-white",
+      "border-orange-400/40 bg-[#112C70] text-orange-400 group-hover/item:bg-orange-500 group-hover/item:text-white",
     iconActive: "border-orange-500 bg-orange-500 text-white",
   },
   {
@@ -56,7 +56,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Headset,
     description: "Calling staff who work your campaigns",
     iconIdle:
-      "border-pink-500 bg-white text-pink-600 group-hover/item:bg-pink-500 group-hover/item:text-white",
+      "border-pink-400/40 bg-[#112C70] text-pink-400 group-hover/item:bg-pink-500 group-hover/item:text-white",
     iconActive: "border-pink-500 bg-pink-500 text-white",
   },
   {
@@ -65,8 +65,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Users,
     description: "Leads for your organization",
     iconIdle:
-      "border-cyan-500 bg-white text-cyan-600 group-hover/item:bg-cyan-500 group-hover/item:text-white",
-    iconActive: "border-cyan-500 bg-cyan-500 text-white",
+      "border-[#56E1E9]/40 bg-[#112C70] text-[#56E1E9] group-hover/item:bg-[#56E1E9] group-hover/item:text-[#0A2353]",
+    iconActive: "border-[#56E1E9] bg-[#56E1E9] text-[#0A2353]",
   },
   {
     label: "Lead Review",
@@ -74,7 +74,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: ClipboardCheck,
     description: "Review and approve eligible leads",
     iconIdle:
-      "border-emerald-500 bg-white text-emerald-600 group-hover/item:bg-emerald-500 group-hover/item:text-white",
+      "border-emerald-400/40 bg-[#112C70] text-emerald-400 group-hover/item:bg-emerald-500 group-hover/item:text-white",
     iconActive: "border-emerald-500 bg-emerald-500 text-white",
   },
   {
@@ -83,7 +83,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: CreditCard,
     description: "Cost analyser and usage billing",
     iconIdle:
-      "border-amber-500 bg-white text-amber-600 group-hover/item:bg-amber-500 group-hover/item:text-white",
+      "border-amber-400/40 bg-[#112C70] text-amber-400 group-hover/item:bg-amber-500 group-hover/item:text-white",
     iconActive: "border-amber-500 bg-amber-500 text-white",
   },
   {
@@ -92,7 +92,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Plug,
     description: "Connect your CRMs and tools via API & webhooks",
     iconIdle:
-      "border-teal-500 bg-white text-teal-600 group-hover/item:bg-teal-500 group-hover/item:text-white",
+      "border-teal-400/40 bg-[#112C70] text-teal-400 group-hover/item:bg-teal-500 group-hover/item:text-white",
     iconActive: "border-teal-500 bg-teal-500 text-white",
   },
   {
@@ -101,8 +101,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: UserCog,
     description: "Profile, organization, and preferences",
     iconIdle:
-      "border-slate-500 bg-white text-slate-600 group-hover/item:bg-slate-600 group-hover/item:text-white",
-    iconActive: "border-slate-600 bg-slate-600 text-white",
+      "border-white/20 bg-[#112C70] text-white/60 group-hover/item:bg-white/20 group-hover/item:text-white",
+    iconActive: "border-white/40 bg-white/20 text-white",
   },
 ];
 
@@ -112,6 +112,12 @@ export function getPageMeta(pathname: string): {
 } {
   const item = NAV_ITEMS.find((n) => pathname.startsWith(n.href));
   if (item) return { title: item.label, description: item.description };
+  if (pathname.startsWith("/agents/new/workflow")) {
+    return {
+      title: "Workflow Builder",
+      description: "AI-assisted conversational flow designer",
+    };
+  }
   if (pathname.startsWith("/agents/new")) {
     return {
       title: "Create Agent",

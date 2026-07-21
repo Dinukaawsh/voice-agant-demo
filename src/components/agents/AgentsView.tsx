@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState, type ComponentProps } from "react";
+import { useMemo, useState, useRef, useEffect, type ComponentProps } from "react";
+import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   Bot,
   Filter,
+  GitBranch,
+  ListOrdered,
   MoreHorizontal,
   Pencil,
   PhoneCall,
@@ -216,6 +219,84 @@ function AgentIconAction({
       >
         {label}
       </span>
+    </div>
+  );
+}
+
+function CreateAgentDropdown({ onFormWizard }: { onFormWizard: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <Button color="brand" onClick={() => setOpen(!open)}>
+        <Plus className="h-4 w-4" />
+        Create agent
+      </Button>
+      {open && (
+        <div className="animate-fade-up absolute right-0 top-full z-40 mt-2 w-72 overflow-hidden rounded-xl border border-border bg-white shadow-card">
+          <div className="px-3 pb-1 pt-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">
+              Choose creation mode
+            </p>
+          </div>
+          <div className="p-1.5">
+            <button
+              onClick={() => {
+                setOpen(false);
+                onFormWizard();
+              }}
+              className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-50"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                <ListOrdered className="h-4 w-4" />
+              </div>
+              <div>
+                <span className="text-[13px] font-semibold text-ink">
+                  Form wizard
+                </span>
+                <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
+                  Step-by-step form. Upload recordings one by one.
+                </p>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setOpen(false);
+                router.push("/agents/new/workflow");
+              }}
+              className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-violet-50"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
+                <GitBranch className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-semibold text-ink">
+                    Workflow mode
+                  </span>
+                  <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-600">
+                    New
+                  </span>
+                </div>
+                <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
+                  Chat with AI to build your flow. Visual diagram editor.
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -432,10 +513,9 @@ export function AgentsView() {
               )}
             </button>
 
-            <Button color="brand" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Create agent
-            </Button>
+            <CreateAgentDropdown
+              onFormWizard={() => setCreateOpen(true)}
+            />
           </div>
 
           <div className={cn("grid gap-2 overflow-hidden transition-all duration-300 sm:hidden", filtersOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0")}>
