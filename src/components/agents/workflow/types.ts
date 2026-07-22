@@ -42,4 +42,7 @@ export type WorkflowState = {
   silencePrompt: { script: string; hasRecording: boolean };
   variations: Variation[];
   extractionFields: { key: string; type: string; description: string }[];
+  enableEdgeCases: boolean;
+  enableSilence: boolean;
+  enableVariations: boolean;
 };

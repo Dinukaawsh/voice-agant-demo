@@ -28,6 +28,8 @@ import { cn } from "@/lib/cn";
 
 type AgentStatus = "Ready" | "Live" | "Testing" | "Draft";
 
+type CreationMode = "form" | "workflow";
+
 type AgentRow = {
   id: string;
   name: string;
@@ -41,6 +43,7 @@ type AgentRow = {
   created: string;
   calls: number;
   qualified: number;
+  creationMode: CreationMode;
 };
 
 const INITIAL_AGENTS: AgentRow[] = [
@@ -57,6 +60,7 @@ const INITIAL_AGENTS: AgentRow[] = [
     created: "Jun 29, 2026",
     calls: 1240,
     qualified: 312,
+    creationMode: "workflow",
   },
   {
     id: "solar-en-q3",
@@ -71,6 +75,7 @@ const INITIAL_AGENTS: AgentRow[] = [
     created: "Jun 18, 2026",
     calls: 580,
     qualified: 89,
+    creationMode: "form",
   },
   {
     id: "insurance-es-pilot",
@@ -85,6 +90,7 @@ const INITIAL_AGENTS: AgentRow[] = [
     created: "Jun 12, 2026",
     calls: 48,
     qualified: 12,
+    creationMode: "form",
   },
   {
     id: "mutuelle-fr",
@@ -99,6 +105,7 @@ const INITIAL_AGENTS: AgentRow[] = [
     created: "Jul 2, 2026",
     calls: 0,
     qualified: 0,
+    creationMode: "workflow",
   },
 ];
 
@@ -302,6 +309,7 @@ function CreateAgentDropdown({ onFormWizard }: { onFormWizard: () => void }) {
 }
 
 export function AgentsView() {
+  const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentRow | null>(null);
   const [agents, setAgents] = useState<AgentRow[]>(INITIAL_AGENTS);
@@ -371,6 +379,7 @@ export function AgentsView() {
         created: "Just now",
         calls: 0,
         qualified: 0,
+        creationMode: "form",
       },
       ...prev,
     ]);
@@ -583,6 +592,20 @@ export function AgentsView() {
                           <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />
                           {agent.status}
                         </span>
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                            agent.creationMode === "workflow"
+                              ? "bg-violet-50 text-violet-600 ring-1 ring-inset ring-violet-200"
+                              : "bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-200",
+                          )}
+                        >
+                          {agent.creationMode === "workflow" ? (
+                            <><GitBranch className="h-2.5 w-2.5" /> Workflow</>
+                          ) : (
+                            <><ListOrdered className="h-2.5 w-2.5" /> Form</>
+                          )}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -603,7 +626,13 @@ export function AgentsView() {
                   >
                     <button
                       type="button"
-                      onClick={() => setEditingAgent(agent)}
+                      onClick={() => {
+                        if (agent.creationMode === "workflow") {
+                          router.push("/agents/new/workflow");
+                        } else {
+                          setEditingAgent(agent);
+                        }
+                      }}
                       className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-violet-200/80 bg-violet-50 px-3 text-[12px] font-semibold text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100"
                     >
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />

@@ -27,36 +27,45 @@ function ReviewChecklist({ workflow }: { workflow: WorkflowState }) {
       ok: workflow.nodes.length >= 3,
       detail: `${workflow.nodes.length} nodes configured`,
       required: true,
+      advanced: false,
     },
     {
       label: "All scripts written",
       ok: workflow.nodes.every((n) => n.script || (n.substages && n.substages.every((s) => s.script))),
       detail: "Every node has a script",
       required: true,
+      advanced: false,
     },
     {
       label: "Edge cases",
-      ok: workflow.edgeCases.length >= 3,
-      detail: `${workflow.edgeCases.length} edge cases`,
+      ok: workflow.enableEdgeCases ? workflow.edgeCases.length >= 3 : false,
+      detail: !workflow.enableEdgeCases ? "Not enabled" : `${workflow.edgeCases.length} edge cases`,
       required: false,
+      advanced: true,
+      disabled: !workflow.enableEdgeCases,
     },
     {
       label: "Silence prompt",
-      ok: !!workflow.silencePrompt.script,
-      detail: workflow.silencePrompt.script ? "Configured" : "Not set",
+      ok: workflow.enableSilence ? !!workflow.silencePrompt.script : false,
+      detail: !workflow.enableSilence ? "Not enabled" : workflow.silencePrompt.script ? "Configured" : "Not set",
       required: false,
+      advanced: true,
+      disabled: !workflow.enableSilence,
     },
     {
       label: "Question variations",
-      ok: workflow.variations.length >= 2,
-      detail: `${workflow.variations.length} variations`,
+      ok: workflow.enableVariations ? workflow.variations.length >= 2 : false,
+      detail: !workflow.enableVariations ? "Not enabled" : `${workflow.variations.length} variations`,
       required: false,
+      advanced: true,
+      disabled: !workflow.enableVariations,
     },
     {
       label: "Recordings uploaded",
       ok: workflow.nodes.every((n) => n.hasRecording),
       detail: `${workflow.nodes.filter((n) => n.hasRecording).length}/${workflow.nodes.length} nodes`,
       required: false,
+      advanced: false,
     },
   ];
 
@@ -67,40 +76,62 @@ function ReviewChecklist({ workflow }: { workflow: WorkflowState }) {
           key={c.label}
           className={cn(
             "flex items-center gap-3 rounded-lg border p-3 transition-all",
-            c.ok
-              ? "border-emerald-200 bg-emerald-50/60"
-              : c.required
-                ? "border-red-200 bg-red-50/60"
-                : "border-amber-200 bg-amber-50/60",
+            "disabled" in c && c.disabled
+              ? "border-slate-200 bg-slate-50/60"
+              : c.ok
+                ? "border-emerald-200 bg-emerald-50/60"
+                : c.required
+                  ? "border-red-200 bg-red-50/60"
+                  : "border-amber-200 bg-amber-50/60",
           )}
         >
           <div
             className={cn(
               "flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-              c.ok
-                ? "bg-emerald-100 text-emerald-600"
-                : c.required
-                  ? "bg-red-100 text-red-500"
-                  : "bg-amber-100 text-amber-600",
+              "disabled" in c && c.disabled
+                ? "bg-slate-100 text-slate-400"
+                : c.ok
+                  ? "bg-emerald-100 text-emerald-600"
+                  : c.required
+                    ? "bg-red-100 text-red-500"
+                    : "bg-amber-100 text-amber-600",
             )}
           >
-            {c.ok ? (
+            {"disabled" in c && c.disabled ? (
+              <X className="h-3.5 w-3.5" />
+            ) : c.ok ? (
               <Check className="h-3.5 w-3.5" />
             ) : (
               <AlertTriangle className="h-3.5 w-3.5" />
             )}
           </div>
           <div className="flex-1">
-            <span className="text-[13px] font-medium text-[#0A2353]">
+            <span className={cn(
+              "text-[13px] font-medium",
+              "disabled" in c && c.disabled ? "text-slate-400" : "text-[#0A2353]",
+            )}>
               {c.label}
             </span>
-            {!c.required && !c.ok && (
+            {c.advanced && (
+              <span className="ml-2 rounded bg-amber-100 px-1 py-0.5 text-[8px] font-bold uppercase text-amber-700">
+                Advanced
+              </span>
+            )}
+            {"disabled" in c && c.disabled && (
+              <span className="ml-2 text-[10px] font-medium text-slate-400">
+                Disabled
+              </span>
+            )}
+            {!("disabled" in c && c.disabled) && !c.required && !c.ok && (
               <span className="ml-2 text-[10px] font-medium text-amber-600">
                 Recommended
               </span>
             )}
           </div>
-          <span className="text-[11px] text-[#7b89a8]">{c.detail}</span>
+          <span className={cn(
+            "text-[11px]",
+            "disabled" in c && c.disabled ? "text-slate-400" : "text-[#7b89a8]",
+          )}>{c.detail}</span>
         </div>
       ))}
     </div>
@@ -116,7 +147,17 @@ function SuggestionsPanel({
 }) {
   const suggestions = [];
 
-  if (workflow.edgeCases.length < 3) {
+  if (!workflow.enableEdgeCases) {
+    suggestions.push({
+      type: "enable-edge",
+      icon: GitBranch,
+      iconBg: "bg-orange-100 text-orange-600",
+      title: "Enable edge cases",
+      description:
+        "Edge cases are currently disabled. Enabling them helps your agent handle objections like 'not interested', 'call back later', or 'how did you get my number?' — making calls more robust and reducing hang-ups.",
+      action: "Enable edge cases",
+    });
+  } else if (workflow.edgeCases.length < 3) {
     suggestions.push({
       type: "edge",
       icon: GitBranch,
@@ -130,7 +171,17 @@ function SuggestionsPanel({
     });
   }
 
-  if (!workflow.silencePrompt.script) {
+  if (!workflow.enableSilence) {
+    suggestions.push({
+      type: "enable-silence",
+      icon: VolumeX,
+      iconBg: "bg-pink-100 text-pink-600",
+      title: "Enable silence prompt",
+      description:
+        "Silence prompt is currently disabled. Without it, your agent won't know what to do when the lead goes quiet. Enabling this helps recover stalled conversations and reduces dead air.",
+      action: "Enable silence prompt",
+    });
+  } else if (!workflow.silencePrompt.script) {
     suggestions.push({
       type: "silence",
       icon: VolumeX,
@@ -142,7 +193,17 @@ function SuggestionsPanel({
     });
   }
 
-  if (workflow.variations.length < workflow.nodes.filter((n) => n.type === "question").length) {
+  if (!workflow.enableVariations) {
+    suggestions.push({
+      type: "enable-variations",
+      icon: Shuffle,
+      iconBg: "bg-[#8B63FF]/15 text-[#8B63FF]",
+      title: "Enable question variations",
+      description:
+        "Question variations are currently disabled. Enabling them makes your agent sound more natural by using different phrasings for each question, reducing the robotic feel of repeated calls.",
+      action: "Enable variations",
+    });
+  } else if (workflow.variations.length < workflow.nodes.filter((n) => n.type === "question").length) {
     suggestions.push({
       type: "variations",
       icon: Shuffle,

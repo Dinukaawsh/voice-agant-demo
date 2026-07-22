@@ -147,6 +147,9 @@ export const MOCK_WORKFLOW: WorkflowState = {
     { key: "has_current_coverage", type: "boolean", description: "Has existing health insurance" },
     { key: "monthly_premium", type: "number", description: "Current monthly premium amount" },
   ],
+  enableEdgeCases: true,
+  enableSilence: true,
+  enableVariations: true,
 };
 
 export const MOCK_CHAT_HISTORY: ChatMessage[] = [

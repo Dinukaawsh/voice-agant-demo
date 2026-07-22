@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -17,6 +17,10 @@ import {
   MessageSquare,
   Upload,
   Settings2,
+  GripVertical,
+  Play,
+  Pause,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { FlowNode, AnswerType } from "./types";
@@ -71,29 +75,69 @@ const TYPE_ICONS: Record<FlowNode["type"], typeof Phone> = {
   exit: PhoneOff,
 };
 
-function UploadBadge({
+function RecordingBadge({
   has,
-  onClick,
+  onUpload,
+  onDelete,
+  onPreview,
 }: {
   has: boolean;
-  onClick?: () => void;
+  onUpload?: () => void;
+  onDelete?: () => void;
+  onPreview?: () => void;
 }) {
+  const [playing, setPlaying] = useState(false);
+
+  if (!has) {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onUpload?.();
+        }}
+        className="flex items-center gap-1 rounded-full border border-dashed border-[#5B58EB]/30 bg-white px-2 py-0.5 text-[10px] font-semibold text-[#5B58EB] transition-all hover:bg-[#5B58EB]/5"
+      >
+        <Upload className="h-3 w-3" />
+        Upload
+      </button>
+    );
+  }
+
   return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick?.();
-      }}
-      className={cn(
-        "flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold transition-all",
-        has
-          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-          : "border border-dashed border-[#5B58EB]/30 bg-white text-[#5B58EB] hover:bg-[#5B58EB]/5",
-      )}
-    >
-      {has ? <Check className="h-3 w-3" /> : <Upload className="h-3 w-3" />}
-      {has ? "Uploaded" : "Upload"}
-    </button>
+    <div className="flex items-center gap-0.5">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setPlaying(!playing);
+          onPreview?.();
+          if (!playing) setTimeout(() => setPlaying(false), 3000);
+        }}
+        className="flex items-center gap-1 rounded-l-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 transition-all hover:bg-emerald-200"
+      >
+        {playing ? <Pause className="h-2.5 w-2.5" /> : <Play className="h-2.5 w-2.5" />}
+        {playing ? "Playing" : "Preview"}
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onUpload?.();
+        }}
+        className="bg-emerald-100 px-1.5 py-0.5 text-emerald-700 transition-all hover:bg-emerald-200"
+        title="Re-upload"
+      >
+        <Upload className="h-2.5 w-2.5" />
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete?.();
+        }}
+        className="rounded-r-full bg-emerald-100 px-1.5 py-0.5 text-emerald-700 transition-all hover:bg-red-100 hover:text-red-600"
+        title="Delete recording"
+      >
+        <X className="h-2.5 w-2.5" />
+      </button>
+    </div>
   );
 }
 
@@ -120,25 +164,31 @@ function RuleBadge({ rule, onEditRule }: { rule: string; onEditRule?: () => void
 
 function NodeCard({
   node,
-  onMoveUp,
-  onMoveDown,
   onEdit,
   onDelete,
   onUpload,
+  onDeleteRecording,
+  isDragging,
+  dragHandleProps,
 }: {
   node: FlowNode;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
   onEdit: () => void;
   onDelete?: () => void;
   onUpload?: () => void;
+  onDeleteRecording?: () => void;
+  isDragging?: boolean;
+  dragHandleProps?: {
+    onDragStart: (e: React.DragEvent) => void;
+    onDragEnd: (e: React.DragEvent) => void;
+    draggable: boolean;
+  };
 }) {
   const style = NODE_STYLES[node.type];
   const Icon = TYPE_ICONS[node.type];
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="group/node relative w-full">
+    <div className={cn("group/node relative w-full transition-all", isDragging && "opacity-50 scale-95")}>
       <div
         className={cn(
           "rounded-xl border-2 transition-all hover:shadow-md",
@@ -148,22 +198,12 @@ function NodeCard({
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-2.5">
-          {node.type === "question" && (
-            <div className="flex flex-col gap-0.5 opacity-0 transition-opacity group-hover/node:opacity-100">
-              <button
-                onClick={onMoveUp}
-                disabled={!onMoveUp}
-                className="rounded p-0.5 text-[#7b89a8] hover:bg-white hover:text-[#0A2353] disabled:invisible"
-              >
-                <ChevronUp className="h-3 w-3" />
-              </button>
-              <button
-                onClick={onMoveDown}
-                disabled={!onMoveDown}
-                className="rounded p-0.5 text-[#7b89a8] hover:bg-white hover:text-[#0A2353] disabled:invisible"
-              >
-                <ChevronDown className="h-3 w-3" />
-              </button>
+          {node.type === "question" && dragHandleProps && (
+            <div
+              {...dragHandleProps}
+              className="cursor-grab rounded p-0.5 text-[#7b89a8] opacity-0 transition-opacity hover:bg-white hover:text-[#0A2353] group-hover/node:opacity-100 active:cursor-grabbing"
+            >
+              <GripVertical className="h-4 w-4" />
             </div>
           )}
 
@@ -190,7 +230,11 @@ function NodeCard({
           </div>
 
           <div className="flex items-center gap-1">
-            <UploadBadge has={node.type === "opening" ? false : node.hasRecording} onClick={onUpload} />
+            <RecordingBadge
+              has={node.type === "opening" ? false : node.hasRecording}
+              onUpload={onUpload}
+              onDelete={onDeleteRecording}
+            />
             <button
               onClick={onEdit}
               className="rounded-lg p-1.5 text-[#7b89a8] transition-colors hover:bg-white hover:text-[#5B58EB]"
@@ -234,7 +278,7 @@ function NodeCard({
                     <p className="min-w-0 flex-1 text-[12px] leading-relaxed text-[#0A2353]/80">
                       {sub.script}
                     </p>
-                    <UploadBadge has={sub.hasRecording} onClick={onUpload} />
+                    <RecordingBadge has={sub.hasRecording} onUpload={onUpload} />
                   </div>
                 ))}
                 <button className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-[#5B58EB] transition-colors hover:bg-[#5B58EB]/5">
@@ -269,7 +313,7 @@ function EndNode({ failScript, hasRecording, onUpload }: { failScript: string; h
             END
           </span>
           <div className="flex-1" />
-          <UploadBadge has={hasRecording} onClick={onUpload} />
+          <RecordingBadge has={hasRecording} onUpload={onUpload} />
           <button className="rounded-lg p-1 text-[#7b89a8] hover:bg-white hover:text-[#5B58EB]">
             <Pencil className="h-3 w-3" />
           </button>
@@ -316,43 +360,52 @@ function BranchRow({
   onEdit,
   onUpload,
   onDelete,
+  onDeleteRecording,
   isLast,
-  onMoveUp,
-  onMoveDown,
+  dragHandleProps,
+  isDragging,
+  onDragOver,
+  onDrop,
 }: {
   node: FlowNode;
   onEdit: () => void;
   onUpload: () => void;
   onDelete?: () => void;
+  onDeleteRecording?: () => void;
   isLast: boolean;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
+  dragHandleProps?: {
+    onDragStart: (e: React.DragEvent) => void;
+    onDragEnd: (e: React.DragEvent) => void;
+    draggable: boolean;
+  };
+  isDragging?: boolean;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
 }) {
   const hasFail = !!(node.rule && node.failScript);
 
   return (
-    <div className="relative w-full">
-      <div className={cn("flex items-start gap-0", hasFail ? "justify-start" : "justify-center")}>
-        {/* Main node column */}
-        <div className={cn("flex flex-col items-center", hasFail ? "w-[55%] shrink-0" : "w-full max-w-lg")}>
-          <NodeCard
-            node={node}
-            onEdit={onEdit}
-            onUpload={onUpload}
-            onMoveUp={onMoveUp}
-            onMoveDown={onMoveDown}
-            onDelete={onDelete}
-          />
-          {!isLast && (
-            <VerticalConnector
-              label={hasFail ? "PASS" : undefined}
-              color={hasFail ? "green" : "gray"}
+    <div
+      className="relative w-full"
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
+      {hasFail ? (
+        <div className="flex w-full items-start justify-center">
+          <div className="flex max-w-lg flex-1 flex-col items-center">
+            <NodeCard
+              node={node}
+              onEdit={onEdit}
+              onUpload={onUpload}
+              onDelete={onDelete}
+              onDeleteRecording={onDeleteRecording}
+              isDragging={isDragging}
+              dragHandleProps={dragHandleProps}
             />
-          )}
-        </div>
-
-        {/* Fail branch */}
-        {hasFail && (
+            {!isLast && (
+              <VerticalConnector label="PASS" color="green" />
+            )}
+          </div>
           <div className="flex items-start pt-6">
             <div className="flex items-center">
               <div className="h-0.5 w-8 bg-red-400" />
@@ -360,7 +413,7 @@ function BranchRow({
                 <span className="mb-1 rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-600">
                   FAIL
                 </span>
-                <ArrowRight className="h-3.5 w-3.5 -ml-0.5 text-red-400" />
+                <ArrowRight className="-ml-0.5 h-3.5 w-3.5 text-red-400" />
               </div>
               <div className="h-0.5 w-4 bg-red-400" />
             </div>
@@ -372,8 +425,25 @@ function BranchRow({
               />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex w-full justify-center">
+          <div className="flex w-full max-w-lg flex-col items-center">
+            <NodeCard
+              node={node}
+              onEdit={onEdit}
+              onUpload={onUpload}
+              onDelete={onDelete}
+              onDeleteRecording={onDeleteRecording}
+              isDragging={isDragging}
+              dragHandleProps={dragHandleProps}
+            />
+            {!isLast && (
+              <VerticalConnector />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -383,14 +453,56 @@ export function FlowDiagram({
   onEdit,
   onUpload,
   onDelete,
+  onDeleteRecording,
   onAddQuestion,
+  onReorder,
 }: {
   nodes: FlowNode[];
   onEdit?: (nodeId: string) => void;
   onUpload?: (nodeId: string) => void;
   onDelete?: (nodeId: string) => void;
+  onDeleteRecording?: (nodeId: string) => void;
   onAddQuestion?: () => void;
+  onReorder?: (fromIndex: number, toIndex: number) => void;
 }) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<number | null>(null);
+
+  function handleDragStart(index: number) {
+    return (e: React.DragEvent) => {
+      setDragIndex(index);
+      e.dataTransfer.effectAllowed = "move";
+    };
+  }
+
+  function handleDragEnd() {
+    return (_e: React.DragEvent) => {
+      setDragIndex(null);
+      setDropTarget(null);
+    };
+  }
+
+  function handleDragOver(index: number) {
+    return (e: React.DragEvent) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (dragIndex !== null && index !== dragIndex) {
+        setDropTarget(index);
+      }
+    };
+  }
+
+  function handleDrop(index: number) {
+    return (e: React.DragEvent) => {
+      e.preventDefault();
+      if (dragIndex !== null && dragIndex !== index) {
+        onReorder?.(dragIndex, index);
+      }
+      setDragIndex(null);
+      setDropTarget(null);
+    };
+  }
+
   return (
     <div className="flex flex-col items-center px-6 py-4">
       {/* Start pill */}
@@ -401,29 +513,34 @@ export function FlowDiagram({
         </span>
       </div>
 
-      {/* Connector from start to first node */}
       <VerticalConnector />
 
-      {nodes.map((node, i) => (
-        <BranchRow
-          key={node.id}
-          node={node}
-          onEdit={() => onEdit?.(node.id)}
-          onUpload={() => onUpload?.(node.id)}
-          onDelete={node.type === "question" ? () => onDelete?.(node.id) : undefined}
-          isLast={i === nodes.length - 1}
-          onMoveUp={
-            node.type === "question" && i > 1
-              ? () => {}
-              : undefined
-          }
-          onMoveDown={
-            node.type === "question" && i < nodes.length - 3
-              ? () => {}
-              : undefined
-          }
-        />
-      ))}
+      {nodes.map((node, i) => {
+        const isQuestion = node.type === "question";
+        return (
+          <BranchRow
+            key={node.id}
+            node={node}
+            onEdit={() => onEdit?.(node.id)}
+            onUpload={() => onUpload?.(node.id)}
+            onDelete={isQuestion ? () => onDelete?.(node.id) : undefined}
+            onDeleteRecording={() => onDeleteRecording?.(node.id)}
+            isLast={i === nodes.length - 1}
+            isDragging={dragIndex === i}
+            dragHandleProps={
+              isQuestion
+                ? {
+                    onDragStart: handleDragStart(i),
+                    onDragEnd: handleDragEnd(),
+                    draggable: true,
+                  }
+                : undefined
+            }
+            onDragOver={isQuestion ? handleDragOver(i) : undefined}
+            onDrop={isQuestion ? handleDrop(i) : undefined}
+          />
+        );
+      })}
 
       {/* Add question button */}
       <div className="flex flex-col items-center">

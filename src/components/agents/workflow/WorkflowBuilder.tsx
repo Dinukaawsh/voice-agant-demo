@@ -11,6 +11,8 @@ import {
   Mic,
   Globe,
   ChevronDown,
+  Phone,
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
@@ -23,6 +25,8 @@ import { EditNodeModal } from "./EditNodeModal";
 import { UploadRecordingModal } from "./UploadRecordingModal";
 import { FinalizeModal } from "./FinalizeModal";
 import { RequestRecordingsModal } from "./RequestRecordingsModal";
+import { TestCallModal } from "./TestCallModal";
+import { AgentOverviewModal } from "./AgentOverviewModal";
 import { MOCK_WORKFLOW, MOCK_CHAT_HISTORY } from "./mock-data";
 import type { ChatMessage, FlowNode } from "./types";
 
@@ -38,6 +42,8 @@ export function WorkflowBuilder() {
   const [showFinalize, setShowFinalize] = useState(false);
   const [showRequestRecordings, setShowRequestRecordings] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showTestCall, setShowTestCall] = useState(false);
+  const [showOverview, setShowOverview] = useState(false);
 
   // Language & save state
   const [language, setLanguage] = useState(workflow.language);
@@ -107,11 +113,29 @@ export function WorkflowBuilder() {
     }
   }
 
+  function handleDeleteRecording(nodeId: string) {
+    setWorkflow((prev) => ({
+      ...prev,
+      nodes: prev.nodes.map((n) =>
+        n.id === nodeId ? { ...n, hasRecording: false } : n,
+      ),
+    }));
+  }
+
   function handleDeleteNode(nodeId: string) {
     setWorkflow((prev) => ({
       ...prev,
       nodes: prev.nodes.filter((n) => n.id !== nodeId),
     }));
+  }
+
+  function handleReorderNodes(fromIndex: number, toIndex: number) {
+    setWorkflow((prev) => {
+      const updated = [...prev.nodes];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return { ...prev, nodes: updated };
+    });
   }
 
   function handleAddQuestion() {
@@ -139,7 +163,8 @@ export function WorkflowBuilder() {
 
   function handleFinalize() {
     setFinalized(true);
-    setTimeout(() => setFinalized(false), 3000);
+    setShowFinalize(false);
+    setShowOverview(true);
   }
 
   return (
@@ -223,7 +248,6 @@ export function WorkflowBuilder() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Saved toast */}
           {savedDraft && (
             <div
               className="flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-[11px] font-semibold text-emerald-700"
@@ -233,6 +257,22 @@ export function WorkflowBuilder() {
               Saved as draft
             </div>
           )}
+          {finalized && (
+            <button
+              onClick={() => setShowOverview(true)}
+              className="flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-700 transition-all hover:bg-emerald-100"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Agent overview
+            </button>
+          )}
+          <button
+            onClick={() => setShowTestCall(true)}
+            className="flex items-center gap-1.5 rounded-full border border-[#5B58EB]/30 bg-[#5B58EB]/5 px-4 py-2.5 text-[12px] font-semibold text-[#5B58EB] transition-all hover:bg-[#5B58EB]/10"
+          >
+            <Phone className="h-3.5 w-3.5" />
+            Test call
+          </button>
           <Button
             variant="ghost"
             color="neutral"
@@ -272,7 +312,7 @@ export function WorkflowBuilder() {
 
       {/* Split pane */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        {/* Left — Chat (flow agent only, no help tab) */}
+        {/* Left -- Chat */}
         <div className="flex w-[380px] shrink-0 flex-col overflow-hidden border-r border-[#d0d5e4] bg-[#f0f2f8]">
           <div className="flex items-center gap-2 border-b border-[#d0d5e4] bg-white px-4 py-2.5">
             <Sparkles className="h-4 w-4 text-[#5B58EB]" />
@@ -286,47 +326,66 @@ export function WorkflowBuilder() {
           <WorkflowChat messages={messages} onSend={handleSend} />
         </div>
 
-        {/* Right — Diagram + Advanced panels */}
+        {/* Right -- Diagram + Advanced panels */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#f0f2f8]/60">
           {/* Tab bar */}
           <div className="flex items-center gap-1 border-b border-[#d0d5e4] bg-white px-4 py-1.5">
             {(
               [
-                { key: "flow", label: "Conversation flow", count: workflow.nodes.length },
-                { key: "edge", label: "Edge cases", count: workflow.edgeCases.length, advanced: true },
-                { key: "silence", label: "Silence", count: undefined, advanced: true },
-                { key: "variations", label: "Variations", count: workflow.variations.length, advanced: true },
+                { key: "flow", label: "Conversation flow", count: workflow.nodes.length, toggle: false },
+                { key: "edge", label: "Edge cases", count: workflow.edgeCases.length, advanced: true, toggle: true, enabled: workflow.enableEdgeCases },
+                { key: "silence", label: "Silence", count: undefined, advanced: true, toggle: true, enabled: workflow.enableSilence },
+                { key: "variations", label: "Variations", count: workflow.variations.length, advanced: true, toggle: true, enabled: workflow.enableVariations },
               ] as const
             ).map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all",
-                  activeTab === tab.key
-                    ? "bg-[#5B58EB]/10 text-[#5B58EB] shadow-sm"
-                    : "text-[#7b89a8] hover:bg-[#f0f2f8] hover:text-[#0A2353]",
-                )}
-              >
-                {tab.label}
-                {"advanced" in tab && tab.advanced && activeTab !== tab.key && (
-                  <span className="rounded bg-amber-100 px-1 py-0.5 text-[8px] font-bold uppercase text-amber-700">
-                    Advanced
-                  </span>
-                )}
-                {tab.count !== undefined && (
-                  <span
+              <div key={tab.key} className="flex items-center gap-1">
+                {tab.toggle && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const field = tab.key === "edge" ? "enableEdgeCases" : tab.key === "silence" ? "enableSilence" : "enableVariations";
+                      setWorkflow((prev) => ({ ...prev, [field]: !prev[field] }));
+                    }}
                     className={cn(
-                      "rounded-full px-1.5 py-0.5 text-[9px] font-bold",
-                      activeTab === tab.key
-                        ? "bg-[#5B58EB]/20 text-[#5B58EB]"
-                        : "bg-[#e4e7f1] text-[#7b89a8]",
+                      "flex h-4 w-4 items-center justify-center rounded border transition-all",
+                      tab.enabled
+                        ? "border-[#5B58EB] bg-[#5B58EB] text-white"
+                        : "border-[#d0d5e4] bg-white",
                     )}
                   >
-                    {tab.count}
-                  </span>
+                    {tab.enabled && <Check className="h-2.5 w-2.5" />}
+                  </button>
                 )}
-              </button>
+                <button
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all",
+                    activeTab === tab.key
+                      ? "bg-[#5B58EB]/10 text-[#5B58EB] shadow-sm"
+                      : "text-[#7b89a8] hover:bg-[#f0f2f8] hover:text-[#0A2353]",
+                    tab.toggle && !tab.enabled && "opacity-50",
+                  )}
+                >
+                  {tab.label}
+                  {"advanced" in tab && tab.advanced && activeTab !== tab.key && (
+                    <span className="rounded bg-amber-100 px-1 py-0.5 text-[8px] font-bold uppercase text-amber-700">
+                      Advanced
+                    </span>
+                  )}
+                  {tab.count !== undefined && (
+                    <span
+                      className={cn(
+                        "rounded-full px-1.5 py-0.5 text-[9px] font-bold",
+                        activeTab === tab.key
+                          ? "bg-[#5B58EB]/20 text-[#5B58EB]"
+                          : "bg-[#e4e7f1] text-[#7b89a8]",
+                      )}
+                    >
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              </div>
             ))}
           </div>
 
@@ -338,7 +397,9 @@ export function WorkflowBuilder() {
                 onEdit={handleEditNode}
                 onUpload={handleUploadNode}
                 onDelete={handleDeleteNode}
+                onDeleteRecording={handleDeleteRecording}
                 onAddQuestion={handleAddQuestion}
+                onReorder={handleReorderNodes}
               />
             )}
             {activeTab === "edge" && (
@@ -360,7 +421,7 @@ export function WorkflowBuilder() {
         </div>
       </div>
 
-      {/* Help chat popup — bottom right corner */}
+      {/* Help chat popup */}
       <HelpChatPopup />
 
       {/* Edit node modal */}
@@ -411,6 +472,31 @@ export function WorkflowBuilder() {
           onClose={() => setShowRequestRecordings(false)}
           onSubmit={() => {
             handleSaveDraft();
+          }}
+        />
+      )}
+
+      {/* Test call modal */}
+      {showTestCall && (
+        <TestCallModal
+          agentName={workflow.agentName}
+          nodes={workflow.nodes}
+          onClose={() => setShowTestCall(false)}
+        />
+      )}
+
+      {/* Agent overview modal (post-finalization) */}
+      {showOverview && (
+        <AgentOverviewModal
+          workflow={workflow}
+          onClose={() => setShowOverview(false)}
+          onEdit={() => {
+            setShowOverview(false);
+            setFinalized(false);
+          }}
+          onTestCall={() => {
+            setShowOverview(false);
+            setShowTestCall(true);
           }}
         />
       )}
