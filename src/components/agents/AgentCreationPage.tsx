@@ -385,6 +385,7 @@ function FlowDiagramSVG({
 
   const nodeH = 56;
   const qGap = 66;
+  const openGap = 92; // extra room under the opening for the repeat-negative line + EXIT clearance
 
   /* vertical layout */
   const startY = 16;
@@ -392,7 +393,7 @@ function FlowDiagramSVG({
   const subCount = agent.openingSubstages.length;
   const openingH = 26 + subCount * 13 + 8;
 
-  const firstQY = openingY + openingH + qGap;
+  const firstQY = openingY + openingH + openGap;
   const qPositions = questions.map((_, i) => firstQY + i * (nodeH + qGap));
   const lastQBottom = qPositions.length > 0 ? qPositions[qPositions.length - 1] + nodeH : firstQY;
 
@@ -404,7 +405,7 @@ function FlowDiagramSVG({
 
   const retainY = openingY;
   const retainH = 64;
-  const exitBoxY = retainY + retainH + 34;
+  const exitBoxY = retainY + retainH + 26;
   const exitBoxH = 40;
 
   const neY = firstQY - 6;
@@ -426,16 +427,12 @@ function FlowDiagramSVG({
   const totalH = endY + 60;
   const totalW = 790;
 
-  /* small helper for hop arcs over the central green line */
-  const hopPath = (fromX: number, y: number, toX: number) =>
-    `M ${fromX} ${y} L ${midX - 6} ${y} A 6 6 0 0 1 ${midX + 6} ${y} L ${toX} ${y}`;
-
   return (
     <svg
       viewBox={`0 0 ${totalW} ${totalH}`}
       width="100%"
       preserveAspectRatio="xMidYMin meet"
-      className="mx-auto block min-w-[520px] max-w-[760px]"
+      className="mx-auto block min-w-[700px] max-w-[1080px]"
       style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}
     >
       <defs>
@@ -484,7 +481,7 @@ function FlowDiagramSVG({
 
       {/* Opening YES → Q1 */}
       <line x1={midX} y1={openingY + openingH} x2={midX} y2={firstQY} stroke="#10b981" strokeWidth={1.8} markerEnd="url(#mg)" />
-      <text x={midX + 7} y={openingY + openingH + qGap / 2} fill="#10b981" fontSize={7.5} fontWeight={700}>YES</text>
+      <text x={midX + 7} y={firstQY - 26} fill="#10b981" fontSize={7.5} fontWeight={700}>YES</text>
 
       {/* Opening NO → Retain Clip */}
       <line x1={nodeX + nodeW} y1={openingY + 24} x2={exitX} y2={openingY + 24} stroke="#ef4444" strokeWidth={1.4} markerEnd="url(#mr)" />
@@ -504,10 +501,17 @@ function FlowDiagramSVG({
             {/* positive / unclear again → Q1 */}
             <path d={`M ${repX} ${ry + 17} L ${railX} ${ry + 17} L ${railX} ${firstQY - 14} L ${nodeX + 55} ${firstQY - 14} L ${nodeX + 55} ${firstQY}`} stroke="#10b981" strokeWidth={1.3} fill="none" markerEnd="url(#mg)" />
             <text x={railX + 8} y={firstQY - 18} fill="#10b981" fontSize={6.5} fontWeight={700}>positive / unclear again</text>
-            {/* negative → EXIT */}
-            <path d={hopPath(repX + 70, ry + 34 + 14 > openingY + openingH + 18 ? ry + 48 : openingY + openingH + 18, exitX + exitW / 2 - 6)} transform="" stroke="none" fill="none" />
-            <path d={`M ${repX + 70} ${ry + 34} L ${repX + 70} ${openingY + openingH + 22} L ${midX - 6} ${openingY + openingH + 22} A 6 6 0 0 1 ${midX + 6} ${openingY + openingH + 22} L ${exitX + exitW / 2} ${openingY + openingH + 22} L ${exitX + exitW / 2} ${exitBoxY}`} stroke="#ef4444" strokeWidth={1.1} fill="none" markerEnd="url(#mr)" />
-            <text x={midX + 16} y={openingY + openingH + 17} fill="#ef4444" fontSize={6.5} fontWeight={600}>negative</text>
+            {/* negative → EXIT (hops over the YES and CONVINCED lines, enters EXIT from the left) */}
+            {(() => {
+              const redY = Math.max(exitBoxY + 10, Math.min(openingY + openingH + 30, exitBoxY + exitBoxH - 10));
+              const convX = nodeX + nodeW - 60;
+              return (
+                <>
+                  <path d={`M ${repX + 70} ${ry + 34} L ${repX + 70} ${redY} L ${midX - 6} ${redY} A 6 6 0 0 1 ${midX + 6} ${redY} L ${convX - 6} ${redY} A 6 6 0 0 1 ${convX + 6} ${redY} L ${exitX + 15} ${redY}`} stroke="#ef4444" strokeWidth={1.1} fill="none" markerEnd="url(#mr)" />
+                  <text x={midX + 16} y={redY - 5} fill="#ef4444" fontSize={6.5} fontWeight={600}>negative</text>
+                </>
+              );
+            })()}
           </g>
         );
       })()}
