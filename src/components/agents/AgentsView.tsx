@@ -1,13 +1,11 @@
 "use client";
 
-import { useMemo, useState, useRef, useEffect, type ComponentProps } from "react";
+import { useMemo, useState, type ComponentProps } from "react";
 import { useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   Bot,
   Filter,
-  GitBranch,
-  ListOrdered,
   MoreHorizontal,
   Pencil,
   PhoneCall,
@@ -19,7 +17,6 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { AgentCreationModal } from "@/components/agents/AgentCreationModal";
 import { AgentEditModal } from "@/components/agents/AgentEditModal";
 import { CustomDropdown, DropdownItem } from "@/components/ui/CustomDropdown";
 import { CustomSelect } from "@/components/ui/CustomSelect";
@@ -230,87 +227,18 @@ function AgentIconAction({
   );
 }
 
-function CreateAgentDropdown({ onFormWizard }: { onFormWizard: () => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+function CreateAgentButton() {
   const router = useRouter();
-
-  useEffect(() => {
-    if (!open) return;
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
-
   return (
-    <div ref={ref} className="relative">
-      <Button color="brand" onClick={() => setOpen(!open)}>
-        <Plus className="h-4 w-4" />
-        Create agent
-      </Button>
-      {open && (
-        <div className="animate-fade-up absolute right-0 top-full z-40 mt-2 w-72 overflow-hidden rounded-xl border border-border bg-white shadow-card">
-          <div className="px-3 pb-1 pt-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-hint">
-              Choose creation mode
-            </p>
-          </div>
-          <div className="p-1.5">
-            <button
-              onClick={() => {
-                setOpen(false);
-                onFormWizard();
-              }}
-              className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-50"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                <ListOrdered className="h-4 w-4" />
-              </div>
-              <div>
-                <span className="text-[13px] font-semibold text-ink">
-                  Form wizard
-                </span>
-                <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
-                  Step-by-step form. Upload recordings one by one.
-                </p>
-              </div>
-            </button>
-            <button
-              onClick={() => {
-                setOpen(false);
-                router.push("/agents/new/workflow");
-              }}
-              className="flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-violet-50"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
-                <GitBranch className="h-4 w-4" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-semibold text-ink">
-                    Workflow mode
-                  </span>
-                  <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-violet-600">
-                    New
-                  </span>
-                </div>
-                <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">
-                  Chat with AI to build your flow. Visual diagram editor.
-                </p>
-              </div>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <Button color="brand" onClick={() => router.push("/agents/create")}>
+      <Plus className="h-4 w-4" />
+      Create agent
+    </Button>
   );
 }
 
 export function AgentsView() {
   const router = useRouter();
-  const [createOpen, setCreateOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentRow | null>(null);
   const [agents, setAgents] = useState<AgentRow[]>(INITIAL_AGENTS);
   const [activeId, setActiveId] = useState(INITIAL_AGENTS[0]?.id);
@@ -354,36 +282,6 @@ export function AgentsView() {
     setStatusFilter("all");
     setLanguageFilter("all");
     setSortBy("newest");
-  }
-
-  function handleCreateAgent(agent: { name: string; language: string }) {
-    const langLabel =
-      agent.language === "fr"
-        ? "French"
-        : agent.language === "es"
-          ? "Spanish"
-          : "English";
-
-    const id = crypto.randomUUID();
-    setAgents((prev) => [
-      {
-        id,
-        name: agent.name,
-        tier: "Standard agent",
-        category: "Insurance",
-        language: langLabel,
-        status: "Draft",
-        backgroundSound: "None",
-        backgroundVolume: 0,
-        extractionFields: 0,
-        created: "Just now",
-        calls: 0,
-        qualified: 0,
-        creationMode: "form",
-      },
-      ...prev,
-    ]);
-    setActiveId(id);
   }
 
   function handleSaveEdit(updated: { name: string; language: string }) {
@@ -522,9 +420,7 @@ export function AgentsView() {
               )}
             </button>
 
-            <CreateAgentDropdown
-              onFormWizard={() => setCreateOpen(true)}
-            />
+            <CreateAgentButton />
           </div>
 
           <div className={cn("grid gap-2 overflow-hidden transition-all duration-300 sm:hidden", filtersOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0")}>
@@ -592,20 +488,6 @@ export function AgentsView() {
                           <span className={cn("h-1.5 w-1.5 rounded-full", style.dot)} />
                           {agent.status}
                         </span>
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                            agent.creationMode === "workflow"
-                              ? "bg-violet-50 text-violet-600 ring-1 ring-inset ring-violet-200"
-                              : "bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-200",
-                          )}
-                        >
-                          {agent.creationMode === "workflow" ? (
-                            <><GitBranch className="h-2.5 w-2.5" /> Workflow</>
-                          ) : (
-                            <><ListOrdered className="h-2.5 w-2.5" /> Form</>
-                          )}
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -626,13 +508,7 @@ export function AgentsView() {
                   >
                     <button
                       type="button"
-                      onClick={() => {
-                        if (agent.creationMode === "workflow") {
-                          router.push("/agents/new/workflow");
-                        } else {
-                          setEditingAgent(agent);
-                        }
-                      }}
+                      onClick={() => router.push("/agents/create")}
                       className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-violet-200/80 bg-violet-50 px-3 text-[12px] font-semibold text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100"
                     >
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -685,7 +561,6 @@ export function AgentsView() {
         )}
       </div>
 
-      <AgentCreationModal open={createOpen} onClose={() => setCreateOpen(false)} onCreate={handleCreateAgent} />
       <AgentEditModal
         agent={editingAgent}
         onClose={() => setEditingAgent(null)}
